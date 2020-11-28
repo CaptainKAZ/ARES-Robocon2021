@@ -1,0 +1,50 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.autoSave": "afterDelay",
+		"editor.tabSize": 2,
+		"editor.renderWhitespace": "all",
+		"editor.defaultFormatter": "ms-vscode.cpptools",
+		"editor.definitionLinkOpensInPeek": true,
+		"editor.hover.delay": 100,
+		"editor.mouseWheelZoom": true,
+		"editor.renameOnType": true,
+		"editor.smoothScrolling": true,
+		"editor.cursorSmoothCaretAnimation": true,
+		"editor.formatOnPaste": true,
+		"editor.formatOnSave": true,
+		"editor.formatOnType": true,
+		"editor.acceptSuggestionOnEnter": "smart",
+		"editor.quickSuggestionsDelay": 5,
+		"files.autoGuessEncoding": true,
+		"files.insertFinalNewline": true,
+		"workbench.editor.highlightModifiedTabs": true,
+		"window.autoDetectColorScheme": true,
+		"C_Cpp.default.cStandard": "c11",
+		"C_Cpp.default.cppStandard": "gnu++17",
+		"C_Cpp.default.intelliSenseMode": "clang-arm",
+		"clang.cflags": [
+			"-I${workspaceRoot}/**"
+		],
+	},
+	"extensions": {
+		"recommendations": [
+			"dan-c-underwood.arm",
+			"ms-vscode.cpptools",
+			"jeff-hykin.better-cpp-syntax",
+			"coenraads.bracket-pair-colorizer",
+			"aaron-bond.better-comments",
+			"mitaki28.vscode-clang",
+			"ms-ceintl.vscode-language-pack-zh-hans",
+			"streetsidesoftware.code-spell-checker",
+			"cschlosser.doxdocgen",
+			"eamodio.gitlens",
+			"cl.keil-assistant",
+			"gruntfuggly.todo-tree",
+		]
+	}
+}
