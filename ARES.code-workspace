@@ -27,11 +27,6 @@
 		"C_Cpp.default.cStandard": "c11",
 		"C_Cpp.default.cppStandard": "gnu++17",
 		"C_Cpp.default.intelliSenseMode": "clang-arm",
-		"clang.cflags": [
-			"-I${workspaceRoot}/Core",
-			"-I${workspaceRoot}/Drivers",
-			"-I${workspaceRoot}/Middlewares"
-		],
 	},
 	"extensions": {
 		"recommendations": [
@@ -40,7 +35,6 @@
 			"jeff-hykin.better-cpp-syntax",
 			"coenraads.bracket-pair-colorizer",
 			"aaron-bond.better-comments",
-			"mitaki28.vscode-clang",
 			"ms-ceintl.vscode-language-pack-zh-hans",
 			"streetsidesoftware.code-spell-checker",
 			"cschlosser.doxdocgen",
