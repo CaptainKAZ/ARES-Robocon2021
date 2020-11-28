@@ -28,7 +28,9 @@
 		"C_Cpp.default.cppStandard": "gnu++17",
 		"C_Cpp.default.intelliSenseMode": "clang-arm",
 		"clang.cflags": [
-			"-I${workspaceRoot}/**"
+			"-I${workspaceRoot}/Core",
+			"-I${workspaceRoot}/Drivers",
+			"-I${workspaceRoot}/Middlewares"
 		],
 	},
 	"extensions": {
