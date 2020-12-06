@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : RNG.h
+  * File Name          : CRC.h
   * Description        : This file provides code for the configuration
-  *                      of the RNG instances.
+  *                      of the CRC instances.
   ******************************************************************************
   * @attention
   *
@@ -17,8 +17,8 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __rng_H
-#define __rng_H
+#ifndef __crc_H
+#define __crc_H
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -30,13 +30,13 @@
 
 /* USER CODE END Includes */
 
-extern RNG_HandleTypeDef hrng;
+extern CRC_HandleTypeDef hcrc;
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_RNG_Init(void);
+void MX_CRC_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
@@ -45,7 +45,7 @@ void MX_RNG_Init(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ rng_H */
+#endif /*__ crc_H */
 
 /**
   * @}

@@ -48,12 +48,26 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for CANComm */
-osThreadId_t CANCommHandle;
-const osThreadAttr_t CANComm_attributes = {
-  .name = "CANComm",
-  .priority = (osPriority_t) osPriorityNormal,
+/* Definitions for CanCommTask */
+osThreadId_t CanCommTaskHandle;
+const osThreadAttr_t CanCommTask_attributes = {
+  .name = "CanCommTask",
+  .priority = (osPriority_t) osPriorityRealtime,
   .stack_size = 256 * 4
+};
+/* Definitions for QuickTestTask */
+osThreadId_t QuickTestTaskHandle;
+const osThreadAttr_t QuickTestTask_attributes = {
+  .name = "QuickTestTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for MotionFXTask */
+osThreadId_t MotionFXTaskHandle;
+const osThreadAttr_t MotionFXTask_attributes = {
+  .name = "MotionFXTask",
+  .priority = (osPriority_t) osPriorityRealtime7,
+  .stack_size = 1024 * 4
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,6 +76,8 @@ const osThreadAttr_t CANComm_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void can_communication_task(void *argument);
+void quick_test_task(void *argument);
+void motionfx_task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -92,8 +108,14 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of CANComm */
-  CANCommHandle = osThreadNew(can_communication_task, NULL, &CANComm_attributes);
+  /* creation of CanCommTask */
+  CanCommTaskHandle = osThreadNew(can_communication_task, NULL, &CanCommTask_attributes);
+
+  /* creation of QuickTestTask */
+  QuickTestTaskHandle = osThreadNew(quick_test_task, NULL, &QuickTestTask_attributes);
+
+  /* creation of MotionFXTask */
+  MotionFXTaskHandle = osThreadNew(motionfx_task, NULL, &MotionFXTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -117,6 +139,42 @@ __weak void can_communication_task(void *argument)
     osDelay(1);
   }
   /* USER CODE END can_communication_task */
+}
+
+/* USER CODE BEGIN Header_quick_test_task */
+/**
+* @brief Function implementing the QuickTestTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_quick_test_task */
+__weak void quick_test_task(void *argument)
+{
+  /* USER CODE BEGIN quick_test_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END quick_test_task */
+}
+
+/* USER CODE BEGIN Header_motionfx_task */
+/**
+* @brief Function implementing the MotionFXTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_motionfx_task */
+__weak void motionfx_task(void *argument)
+{
+  /* USER CODE BEGIN motionfx_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END motionfx_task */
 }
 
 /* Private application code --------------------------------------------------*/

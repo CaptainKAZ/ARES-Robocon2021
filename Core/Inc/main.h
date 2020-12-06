@@ -29,16 +29,6 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-#include "stm32f4xx_ll_rcc.h"
-#include "stm32f4xx_ll_bus.h"
-#include "stm32f4xx_ll_system.h"
-#include "stm32f4xx_ll_exti.h"
-#include "stm32f4xx_ll_cortex.h"
-#include "stm32f4xx_ll_utils.h"
-#include "stm32f4xx_ll_pwr.h"
-#include "stm32f4xx_ll_dma.h"
-#include "stm32f4xx_ll_rng.h"
-#include "stm32f4xx_ll_gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -80,6 +70,23 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define IST_DRDY_Pin GPIO_PIN_3
+#define IST_DRDY_GPIO_Port GPIOE
+#define IST_RST_Pin GPIO_PIN_2
+#define IST_RST_GPIO_Port GPIOE
+#define MPU_DRDY_Pin GPIO_PIN_8
+#define MPU_DRDY_GPIO_Port GPIOB
+#define MPU_DRDY_EXTI_IRQn EXTI9_5_IRQn
+#define PWR0_Pin GPIO_PIN_2
+#define PWR0_GPIO_Port GPIOH
+#define PWR1_Pin GPIO_PIN_3
+#define PWR1_GPIO_Port GPIOH
+#define PWR2_Pin GPIO_PIN_4
+#define PWR2_GPIO_Port GPIOH
+#define PWR3_Pin GPIO_PIN_5
+#define PWR3_GPIO_Port GPIOH
+#define MPU_NSS_Pin GPIO_PIN_6
+#define MPU_NSS_GPIO_Port GPIOF
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

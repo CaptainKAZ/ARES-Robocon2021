@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : RNG.c
+  * File Name          : CRC.c
   * Description        : This file provides code for the configuration
-  *                      of the RNG instances.
+  *                      of the CRC instances.
   ******************************************************************************
   * @attention
   *
@@ -18,55 +18,55 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "rng.h"
+#include "crc.h"
 
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
 
-RNG_HandleTypeDef hrng;
+CRC_HandleTypeDef hcrc;
 
-/* RNG init function */
-void MX_RNG_Init(void)
+/* CRC init function */
+void MX_CRC_Init(void)
 {
 
-  hrng.Instance = RNG;
-  if (HAL_RNG_Init(&hrng) != HAL_OK)
+  hcrc.Instance = CRC;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
   {
     Error_Handler();
   }
 
 }
 
-void HAL_RNG_MspInit(RNG_HandleTypeDef* rngHandle)
+void HAL_CRC_MspInit(CRC_HandleTypeDef* crcHandle)
 {
 
-  if(rngHandle->Instance==RNG)
+  if(crcHandle->Instance==CRC)
   {
-  /* USER CODE BEGIN RNG_MspInit 0 */
+  /* USER CODE BEGIN CRC_MspInit 0 */
 
-  /* USER CODE END RNG_MspInit 0 */
-    /* RNG clock enable */
-    __HAL_RCC_RNG_CLK_ENABLE();
-  /* USER CODE BEGIN RNG_MspInit 1 */
+  /* USER CODE END CRC_MspInit 0 */
+    /* CRC clock enable */
+    __HAL_RCC_CRC_CLK_ENABLE();
+  /* USER CODE BEGIN CRC_MspInit 1 */
 
-  /* USER CODE END RNG_MspInit 1 */
+  /* USER CODE END CRC_MspInit 1 */
   }
 }
 
-void HAL_RNG_MspDeInit(RNG_HandleTypeDef* rngHandle)
+void HAL_CRC_MspDeInit(CRC_HandleTypeDef* crcHandle)
 {
 
-  if(rngHandle->Instance==RNG)
+  if(crcHandle->Instance==CRC)
   {
-  /* USER CODE BEGIN RNG_MspDeInit 0 */
+  /* USER CODE BEGIN CRC_MspDeInit 0 */
 
-  /* USER CODE END RNG_MspDeInit 0 */
+  /* USER CODE END CRC_MspDeInit 0 */
     /* Peripheral clock disable */
-    __HAL_RCC_RNG_CLK_DISABLE();
-  /* USER CODE BEGIN RNG_MspDeInit 1 */
+    __HAL_RCC_CRC_CLK_DISABLE();
+  /* USER CODE BEGIN CRC_MspDeInit 1 */
 
-  /* USER CODE END RNG_MspDeInit 1 */
+  /* USER CODE END CRC_MspDeInit 1 */
   }
 }
 

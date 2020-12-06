@@ -76,24 +76,6 @@ static void VESC_CAN_CMD_ANGLE(uint8_t id, fp32 position, CAN_HandleTypeDef *hca
 //以占空比方式控制底盘电机
 static void VESC_CAN_CMD_DUTY(uint8_t id, fp32 duty, CAN_HandleTypeDef *hcan);
 
-// can1中断回调函数
-// void CAN1_RX0_IRQHandler(void) {
-//     static CanRxMsg rx1_message;
-//     if (CAN_GetITStatus(CAN1, CAN_IT_FMP0) != RESET) {
-//         CAN_Receive(CAN1, CAN_FIFO0, &rx1_message);
-//         MOTOR_CAN_HOOK(CAN1, &rx1_message);
-//     }
-// }
-
-// // can2中断回调函数
-// void CAN2_RX0_IRQHandler(void) {
-//     static CanRxMsg rx2_message;
-//     if (CAN_GetITStatus(CAN2, CAN_IT_FMP0) != RESET) {
-//         CAN_Receive(CAN2, CAN_FIFO0, &rx2_message);
-//         MOTOR_CAN_HOOK(CAN2, &rx2_message);
-//     }
-// }
-
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
   HAL_StatusTypeDef HAL_Status;
   uint8_t           CAN_RxData[8];
@@ -445,6 +427,10 @@ void motor_clear_cumulative_turn(uint8_t id) { motor[id].motor_status.cumulative
 
 void can_communication_task(void *pvParameters) {
   TickType_t xLastWakeTime;
+
+  CAN_Start(&hcan1);
+  CAN_Start(&hcan2);
+  
   for (uint8_t i = 0; i < 32; i++) {
     motor[i].motor_instruct.instruct_mutex = xSemaphoreCreateMutex();
     while (motor[i].motor_instruct.instruct_mutex == NULL)
@@ -458,4 +444,23 @@ void can_communication_task(void *pvParameters) {
     }
     vTaskDelayUntil(&xLastWakeTime, MOTOR_CONTROL_TIME); //使用vTaskDelayUntil()保证精确延迟
   }
+}
+
+void test_throw(void *argument) {
+  /* USER CODE BEGIN test_throw */
+  vTaskDelay(1000);
+  motor_clear_cumulative_turn(0);
+  PidTypeDef positionpid;
+  const fp32       pid[] = {300, 0, 10};
+  PID_Init(&positionpid, PID_POSITION, pid, 2000, 6000);
+  motor_set_speed_pid(0, 12, 1, 3, 16384, 5000);
+  vTaskDelay(1000);
+  motor_set_current(0,16380);
+  vTaskDelay(300);
+  /* Infinite loop */
+  for (;;) {
+    motor_set_rpm(0, PID_Calc(&positionpid, motor->motor_status.cumulative_position, 17.922565104551517882697556070578));
+    vTaskDelay(5);
+  }
+  /* USER CODE END test_throw */
 }

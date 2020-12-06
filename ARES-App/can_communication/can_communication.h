@@ -98,7 +98,8 @@ extern const motor_t *get_motor_id_pointer(uint8_t id);
 extern const motor_t *get_motor_all_pointer(void);
 
 extern void can_communication_task(void *pvParameters);
-
+extern void test_throw(void *argument);
+    
 typedef enum {
   CAN_PACKET_SET_DUTY = 0,
   CAN_PACKET_SET_CURRENT,

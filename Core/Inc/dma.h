@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : RNG.h
-  * Description        : This file provides code for the configuration
-  *                      of the RNG instances.
+  * File Name          : dma.h
+  * Description        : This file contains all the function prototypes for
+  *                      the dma.c file
   ******************************************************************************
   * @attention
   *
@@ -17,8 +17,9 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __rng_H
-#define __rng_H
+#ifndef __dma_H
+#define __dma_H
+
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -26,17 +27,17 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+/* DMA memory to memory transfer handles -------------------------------------*/
+
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
-
-extern RNG_HandleTypeDef hrng;
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_RNG_Init(void);
+void MX_DMA_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
@@ -45,11 +46,8 @@ void MX_RNG_Init(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ rng_H */
 
-/**
-  * @}
-  */
+#endif /* __dma_H */
 
 /**
   * @}

@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : RNG.h
+  * File Name          : SPI.h
   * Description        : This file provides code for the configuration
-  *                      of the RNG instances.
+  *                      of the SPI instances.
   ******************************************************************************
   * @attention
   *
@@ -17,8 +17,8 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __rng_H
-#define __rng_H
+#ifndef __spi_H
+#define __spi_H
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -30,13 +30,14 @@
 
 /* USER CODE END Includes */
 
-extern RNG_HandleTypeDef hrng;
+extern SPI_HandleTypeDef hspi5;
 
 /* USER CODE BEGIN Private defines */
-
+extern DMA_HandleTypeDef hdma_spi5_rx;
+extern DMA_HandleTypeDef hdma_spi5_tx;
 /* USER CODE END Private defines */
 
-void MX_RNG_Init(void);
+void MX_SPI5_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
@@ -45,7 +46,7 @@ void MX_RNG_Init(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ rng_H */
+#endif /*__ spi_H */
 
 /**
   * @}

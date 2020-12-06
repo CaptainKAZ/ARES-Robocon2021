@@ -19,7 +19,9 @@
                 "${workspaceFolder}\\Core\\Src",
                 "${workspaceFolder}\\Drivers\\STM32F4xx_HAL_Driver\\Src",
                 "${workspaceFolder}\\Middlewares\\Third_Party\\FreeRTOS\\Source",
-                "${workspaceFolder}\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\MemMang"
+                "${workspaceFolder}\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\MemMang",
+                "${workspaceFolder}\\Middlewares\\ST\\STM32_MotionFX_Library\\Inc",
+                "${workspaceFolder}\\ARES-App\\motionfx"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
