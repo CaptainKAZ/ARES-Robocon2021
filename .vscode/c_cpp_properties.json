@@ -13,7 +13,7 @@
                 "${workspaceFolder}\\Drivers\\CMSIS\\Include",
                 "${workspaceFolder}\\ARES-App\\pid",
                 "${workspaceFolder}\\ARES-App\\can_communication",
-                "C:\\Keil_v5\\ARM\\ARMCC\\include",
+                "C:\\Keil_v5\\ARM\\AR  MCC\\include",
                 "C:\\Keil_v5\\ARM\\ARMCC\\include\\rw",
                 "${workspaceFolder}\\MDK-ARM",
                 "${workspaceFolder}\\Core\\Src",

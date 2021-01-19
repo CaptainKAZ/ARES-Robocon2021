@@ -18,6 +18,7 @@
 
 #include "can_communication.h"
 
+#include "tim.h"
 #include "can.h"
 #include <stdlib.h>
 #include <string.h>
@@ -342,11 +343,11 @@ void RM_CAN_CMD_RESET_ID(CAN_HandleTypeDef *hcan) {
   TxMsgHdr.RTR   = CAN_RTR_DATA;
   TxMsgHdr.DLC   = 0x08;
   TxData[0]      = 0;
-  TxData[1]      =0;
+  TxData[1]      = 0;
   TxData[2]      = 0;
-  TxData[3]      =0;
+  TxData[3]      = 0;
   TxData[4]      = 0;
-  TxData[5]      =0;
+  TxData[5]      = 0;
   TxData[6]      = 0;
   TxData[7]      = 0;
   HAL_CAN_AddTxMessage(hcan, &TxMsgHdr, TxData, NULL);
@@ -374,7 +375,7 @@ static void RM_process_motor(uint8_t group) {
         case CURRENT: break;
         default: motor[i].motor_instruct.set_current = 0; break;
         }
-        motor[i].motor_instruct.transmitted_flag = 1;
+        //motor[i].motor_instruct.transmitted_flag = 1;
       }
       xSemaphoreGive(motor[i].motor_instruct.instruct_mutex);
     }
@@ -427,10 +428,9 @@ void motor_clear_cumulative_turn(uint8_t id) { motor[id].motor_status.cumulative
 
 void can_communication_task(void *pvParameters) {
   TickType_t xLastWakeTime;
-
   CAN_Start(&hcan1);
   CAN_Start(&hcan2);
-  
+
   for (uint8_t i = 0; i < 32; i++) {
     motor[i].motor_instruct.instruct_mutex = xSemaphoreCreateMutex();
     while (motor[i].motor_instruct.instruct_mutex == NULL)
@@ -446,21 +446,38 @@ void can_communication_task(void *pvParameters) {
   }
 }
 
-void test_throw(void *argument) {
+void quick_test_task(void *argument) {
   /* USER CODE BEGIN test_throw */
-  vTaskDelay(1000);
+  vTaskDelay(2000);
   motor_clear_cumulative_turn(0);
-  PidTypeDef positionpid;
-  const fp32       pid[] = {300, 0, 10};
-  PID_Init(&positionpid, PID_POSITION, pid, 2000, 6000);
-  motor_set_speed_pid(0, 12, 1, 3, 16384, 5000);
-  vTaskDelay(1000);
-  motor_set_current(0,16380);
-  vTaskDelay(300);
-  /* Infinite loop */
-  for (;;) {
-    motor_set_rpm(0, PID_Calc(&positionpid, motor->motor_status.cumulative_position, 17.922565104551517882697556070578));
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 1000);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 1000);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 1000);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 1000);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+  vTaskDelay(5000);
+  static int8_t times = 50;
+  while (1) {
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 2000);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 2000);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 2000);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 2000);
+    if (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == SET) {
+      if (times-- > 0) {
+        motor_set_current(1, 16000);
+      } else {
+        motor_set_current(1, -16000); 
+        times = -1;
+      }
+    } else {
+      motor_set_current(1, -2000);
+      times = 50;
+    }
     vTaskDelay(5);
   }
+
   /* USER CODE END test_throw */
 }

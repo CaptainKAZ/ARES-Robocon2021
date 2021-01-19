@@ -87,6 +87,8 @@ void Error_Handler(void);
 #define PWR3_GPIO_Port GPIOH
 #define MPU_NSS_Pin GPIO_PIN_6
 #define MPU_NSS_GPIO_Port GPIOF
+#define KEY_Pin GPIO_PIN_2
+#define KEY_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
