@@ -88,14 +88,14 @@ static void MotionFX_Init(void) {
 static HAL_StatusTypeDef MPU_SPI_speed_change(SPI_HandleTypeDef *hspi) {
   __HAL_LOCK(hspi);
   hspi->Instance->CR1 &= 0xF7C7;
-  hspi->Instance->CR1 |= SPI_BAUDRATEPRESCALER_8;
-  hspi->Instance->CR1 |= SPI_DATASIZE_8BIT;
+  hspi->Instance->CR1 |= ((uint16_t)0x0018);
+  hspi->Instance->CR1 |= ((uint16_t)0x0000);
   hspi->Instance->CR1 |= 1 << 6;
   __HAL_UNLOCK(hspi);
   return HAL_OK;
 }
 
-void motionfx_task(void *pvParameters) {
+/*void motionfx_task(void *pvParameters) {
   TickType_t last_wake_time;
   float      delta_time;
   //延迟等待系统稳定
@@ -117,7 +117,7 @@ void motionfx_task(void *pvParameters) {
   initialized = 1;
   for (;;) {
     last_wake_time = xTaskGetTickCount();
-    //等待数据传输完成
+    //等待外部中断中断唤醒任务
     while (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) != pdPASS)
       ;
     counter++;
@@ -125,7 +125,7 @@ void motionfx_task(void *pvParameters) {
     mpu6500_get_data(SPI_RX_buf + MPU6500_RX_BUF_DATA_OFFSET, &mpu6500_real_data);
     ist8310_get_data(SPI_RX_buf + IST8310_RX_BUF_DATA_OFFSET, &ist8310_real_data);
     MotionFX_get_input(&motionFX_input, &mpu6500_real_data, &ist8310_real_data);
-    delta_time = (fp32)(xTaskGetTickCount() - last_wake_time) / 1000.0f;
+    delta_time = 0.01f;
     MotionFX_propagate(&motionFX_output, &motionFX_input, &delta_time);
     if (counter == MFX_UPDATE_INTERVAL) {
       MotionFX_update(&motionFX_output, &motionFX_input, &delta_time, NULL);
@@ -137,6 +137,7 @@ void motionfx_task(void *pvParameters) {
     }
   }
 }
+*/
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
   if (GPIO_Pin == MPU_DRDY_Pin) {
@@ -150,6 +151,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
   if (hspi->Instance == SPI5) {
     mpu6500_SPI_NSS_H();
+    HAL_SPI_DMAStop(hspi);
     //唤醒任务
     if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
       static BaseType_t xHigherPriorityTaskWoken;
@@ -160,21 +162,21 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
 }
 
 char MotionFX_LoadMagCalFromNVM(unsigned short int dataSize, unsigned int *data) {
-  memcpy(data, (void*)MFX_DATA_ADDRESS, dataSize);
-  return 1;
+  memcpy(data, (void *)MFX_DATA_ADDRESS, dataSize);
+  return 0;
 }
 
 char MotionFX_SaveMagCalInNVM(unsigned short int dataSize, unsigned int *data) {
   if (HAL_FLASH_Unlock() != HAL_OK) {
-    return 0;
+    return 1;
   }
   for (uint8_t i = 0; i < dataSize; i++) {
     if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, MFX_DATA_ADDRESS + i * 8, data[i]) != HAL_OK) {
-      return 0;
+      return 1;
     }
   }
   if (HAL_FLASH_Lock() != HAL_OK) {
-    return 0;
+    return 1;
   }
-  return 1;
+  return 0;
 }

@@ -374,7 +374,7 @@ static void RM_process_motor(uint8_t group) {
         case CURRENT: break;
         default: motor[i].motor_instruct.set_current = 0; break;
         }
-        motor[i].motor_instruct.transmitted_flag = 1;
+        //motor[i].motor_instruct.transmitted_flag = 1;
       }
       xSemaphoreGive(motor[i].motor_instruct.instruct_mutex);
     }
@@ -458,7 +458,7 @@ void test_throw(void *argument) {
   motor_set_current(0,16380);
   vTaskDelay(300);
   /* Infinite loop */
-  for (;;) {
+  for (;;) { 
     motor_set_rpm(0, PID_Calc(&positionpid, motor->motor_status.cumulative_position, 17.922565104551517882697556070578));
     vTaskDelay(5);
   }

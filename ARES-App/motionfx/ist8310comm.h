@@ -25,7 +25,7 @@
 
 #define IST8310_RST_H() HAL_GPIO_WritePin(IST_RST_GPIO_Port, IST_RST_Pin, GPIO_PIN_SET)
 #define IST8310_RST_L() HAL_GPIO_WritePin(IST_RST_GPIO_Port, IST_RST_Pin, GPIO_PIN_RESET)
-#define IIC_DELAY 2
+#define IIC_DELAY 1
 
 extern void ist8310_auto_com_by_mpu6500(void);
 extern uint8_t ist8310_IIC_read_single_reg(uint8_t reg);
