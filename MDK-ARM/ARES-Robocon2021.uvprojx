@@ -137,7 +137,7 @@
             <DriverSelection>4101</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>STLink\ST-LINKIII-KEIL_SWO.dll</Flash2>
+          <Flash2>BIN\UL2CM3.DLL</Flash2>
           <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F427xx, ARM_MATH_CM4</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;     ../Drivers/STM32F4xx_HAL_Driver/Inc;     ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;     ../Middlewares/Third_Party/FreeRTOS/Source/include;     ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;     ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;     ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;     ../Drivers/CMSIS/Include;     ..\ARES-App\pid;     ..\ARES-App\can_communication;     ..\ARES-App\user_lib;     ..\DSP\Include;     ..\Drivers\CMSIS\DSP\Include;     ../Middlewares/ST/STM32_MotionFX_Library/Inc;     ..\ARES-App\motionfx;     ..\ARES-App\remote_control;     ..\ARES-App\bsp_rc</IncludePath>
+              <IncludePath>../Core/Inc;       ../Drivers/STM32F4xx_HAL_Driver/Inc;       ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;       ../Middlewares/Third_Party/FreeRTOS/Source/include;       ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;       ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;       ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;       ../Drivers/CMSIS/Include;       ..\ARES-App\pid;       ..\ARES-App\can_communication;       ..\ARES-App\user_lib;       ..\DSP\Include;       ..\Drivers\CMSIS\DSP\Include;       ../Middlewares/ST/STM32_MotionFX_Library/Inc;       ..\ARES-App\motionfx;       ..\ARES-App\remote_control;       ..\ARES-App\bsp_rc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -433,9 +433,11 @@
               <FilePath>../Core/Src/spi.c</FilePath>
             </File>
             <File>
-              <FileName>tim.c</FileName>
+              <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/tim.c</FilePath>
+            </File>
+            <File>
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/usart.c</FilePath>

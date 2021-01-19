@@ -459,22 +459,22 @@ void quick_test_task(void *argument) {
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
   vTaskDelay(5000);
-  static int8_t times = 50;
+  static int8_t times = 5;
   while (1) {
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 2000);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 2000);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 2000);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 2000);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 1500);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 1500);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 1500);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 1500);
     if (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == SET) {
       if (times-- > 0) {
         motor_set_current(1, 16000);
       } else {
-        motor_set_current(1, -16000); 
+        motor_set_current(1, -16000);
         times = -1;
       }
     } else {
       motor_set_current(1, -2000);
-      times = 50;
+      times = 5;
     }
     vTaskDelay(5);
   }

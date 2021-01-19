@@ -1,125 +1,68 @@
 #include "remote_control.h"
+#include "usart.h"
 
-extern UART_HandleTypeDef huart1;
-extern DMA_HandleTypeDef  hdma_usart1_rx;
+fp32           SBUS_CHANNEL[10];
+static uint8_t SBUS_rx_buf[2][SBUS_RX_BUF_NUM];
 
-static void sbus_to_rc(volatile const uint8_t *sbus_buf, RC_ctrl_t *rc_ctrl);
-
-RC_ctrl_t rc_ctrl;
-
-//接收原始数据，为25个字节，给了50个字节长度，防止DMA传输越界
-static uint8_t sbus_rx_buf[2][SBUS_RX_BUF_NUM];
-void remote_control_init(void)
-{
-    RC_init(sbus_rx_buf[0], sbus_rx_buf[1], SBUS_RX_BUF_NUM);
+static void SBUS_init(void) {
+  //使能DMA串口接收
+  SET_BIT(huart1.Instance->CR3, USART_CR3_DMAR);
+  //使能串口空闲中断
+  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+  //停止DMA接收
+  __HAL_DMA_DISABLE(&hdma_usart1_rx);
+  //由于DMA是AHB总线主设备,和CPU有冲突，所以有可能一次指令不成功
+  while (hdma_usart1_rx.Instance->CR & DMA_SxCR_EN) {
+    __HAL_DMA_DISABLE(&hdma_usart1_rx);
+  }
+  //将DMA的外设地址设置为USART1的DR寄存器
+  hdma_usart1_rx.Instance->PAR = (uint32_t) & (huart1.Instance->DR);
+  //将DMA的缓冲区1地址设置为第一个BUFFER
+  hdma_usart1_rx.Instance->M0AR = (uint32_t)(&SBUS_rx_buf[0]);
+  //将DMA的缓冲区2地址设置为第二个BUFFER
+  hdma_usart1_rx.Instance->M1AR = (uint32_t)(&SBUS_rx_buf[1]);
+  //DMA接收长度为缓冲区大小
+  hdma_usart1_rx.Instance->NDTR = SBUS_RX_BUF_NUM;
+  //使能双缓冲区
+  SET_BIT(hdma_usart1_rx.Instance->CR, DMA_SxCR_DBM);
+  //使能DMA
+  __HAL_DMA_ENABLE(&hdma_usart1_rx);
 }
 
-const RC_ctrl_t *get_remote_control_point(void)
-{
-    return &rc_ctrl;
+static void parse_SBUS(volatile const uint8_t *sbus_buf) {
+  SBUS_CHANNEL[0] = (((sbus_buf[1] | (sbus_buf[2] << 8)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
+  SBUS_CHANNEL[1] = ((((sbus_buf[2] >> 3) | (sbus_buf[3] << 5)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
+  SBUS_CHANNEL[2] =
+      ((((sbus_buf[3] >> 6) | (sbus_buf[4] << 2) | (sbus_buf[5] << 10)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
+  SBUS_CHANNEL[3] = ((((sbus_buf[5] >> 1) | (sbus_buf[6] << 7)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
+  SBUS_CHANNEL[4] = ((((sbus_buf[6] >> 4) | (sbus_buf[7] << 4)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
+  SBUS_CHANNEL[5] =
+      ((((sbus_buf[7] >> 7) | (sbus_buf[8] << 1) | (sbus_buf[9] << 9)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
+  SBUS_CHANNEL[6] = ((((sbus_buf[9] >> 2) | (sbus_buf[10] << 6)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
+  SBUS_CHANNEL[7] = ((((sbus_buf[10] >> 5) | (sbus_buf[11] << 3)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
+  SBUS_CHANNEL[8] = (((sbus_buf[12] | (sbus_buf[13] << 8)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
+  SBUS_CHANNEL[9] = ((((sbus_buf[13] >> 3) | (sbus_buf[14] << 5)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
 }
 
-//串口中断
-void USART1_IRQHandler(void)
-{
-    if(huart1.Instance->SR & UART_FLAG_RXNE)//接收到数据
-    {
-        __HAL_UART_CLEAR_PEFLAG(&huart1);
+void USART1_IRQHandler(void) {
+  static uint16_t this_time_rx_len = 0;
+
+  __HAL_UART_CLEAR_PEFLAG(&huart1);
+  __HAL_DMA_DISABLE(&hdma_usart1_rx);
+  this_time_rx_len              = SBUS_RX_BUF_NUM - hdma_usart1_rx.Instance->NDTR;
+  hdma_usart1_rx.Instance->NDTR = SBUS_RX_BUF_NUM;
+
+  if ((hdma_usart1_rx.Instance->CR & DMA_SxCR_CT) == RESET) {
+    hdma_usart1_rx.Instance->CR |= DMA_SxCR_CT;
+    __HAL_DMA_ENABLE(&hdma_usart1_rx);
+    if (this_time_rx_len == RC_FRAME_LENGTH) {
+      parse_SBUS(SBUS_rx_buf[0]);
     }
-    else if(USART1->SR & UART_FLAG_IDLE)
-    {
-        static uint16_t this_time_rx_len = 0;
-
-        __HAL_UART_CLEAR_PEFLAG(&huart1);
-
-        if ((hdma_usart1_rx.Instance->CR & DMA_SxCR_CT) == RESET)
-        {
-            /* Current memory buffer used is Memory 0 */
-    
-            //disable DMA
-            //失效DMA
-            __HAL_DMA_DISABLE(&hdma_usart1_rx);
-
-            //get receive data length, length = set_data_length - remain_length
-            //获取接收数据长度,长度 = 设定长度 - 剩余长度
-            this_time_rx_len = SBUS_RX_BUF_NUM - hdma_usart1_rx.Instance->NDTR;
-
-            //reset set_data_lenght
-            //重新设定数据长度
-            hdma_usart1_rx.Instance->NDTR = SBUS_RX_BUF_NUM;
-
-            //set memory buffer 1
-            //设定缓冲区1
-            hdma_usart1_rx.Instance->CR |= DMA_SxCR_CT;
-            
-            //enable DMA
-            //使能DMA
-            __HAL_DMA_ENABLE(&hdma_usart1_rx);
-
-            if(this_time_rx_len == RC_FRAME_LENGTH)
-            {
-                sbus_to_rc(sbus_rx_buf[0], &rc_ctrl);
-            }
-        }
-        else
-        {
-            /* Current memory buffer used is Memory 1 */
-            //disable DMA
-            //失效DMA
-            __HAL_DMA_DISABLE(&hdma_usart1_rx);
-
-            //get receive data length, length = set_data_length - remain_length
-            //获取接收数据长度,长度 = 设定长度 - 剩余长度
-            this_time_rx_len = SBUS_RX_BUF_NUM - hdma_usart1_rx.Instance->NDTR;
-
-            //reset set_data_lenght
-            //重新设定数据长度
-            hdma_usart1_rx.Instance->NDTR = SBUS_RX_BUF_NUM;
-
-            //set memory buffer 0
-            //设定缓冲区0
-            hdma_usart1_rx.Instance->CR &= ~(DMA_SxCR_CT);
-            
-            //enable DMA
-            //使能DMA
-            __HAL_DMA_ENABLE(&hdma_usart1_rx);
-
-            if(this_time_rx_len == RC_FRAME_LENGTH)
-            {
-                //处理遥控器数据
-                sbus_to_rc(sbus_rx_buf[1], &rc_ctrl);
-            }
-        }
+  } else {
+    hdma_usart1_rx.Instance->CR &= ~(DMA_SxCR_CT);
+    __HAL_DMA_ENABLE(&hdma_usart1_rx);
+    if (this_time_rx_len == RC_FRAME_LENGTH) {
+      parse_SBUS(SBUS_rx_buf[1]);
     }
-}
-
-static void sbus_to_rc(volatile const uint8_t *sbus_buf, RC_ctrl_t *rc_ctrl)
-{
-    if (sbus_buf == NULL || rc_ctrl == NULL)
-    {
-        return;
-    }
-
-    rc_ctrl->rc.ch[0] = (sbus_buf[1] | (sbus_buf[2] << 8)) & 0x07ff;        //!< Channel 0
-    rc_ctrl->rc.ch[1] = ((sbus_buf[2] >> 3) | (sbus_buf[3] << 5)) & 0x07ff; //!< Channel 1
-    rc_ctrl->rc.ch[2] = ((sbus_buf[3] >> 6) | (sbus_buf[4] << 2) |          //!< Channel 2
-                         (sbus_buf[5] << 10)) &0x07ff;
-    rc_ctrl->rc.ch[3] = ((sbus_buf[5] >> 1) | (sbus_buf[6] << 7)) & 0x07ff; //!< Channel 3                  
-    rc_ctrl->rc.ch[4] = ((sbus_buf[6] >> 4) | (sbus_buf[7] << 4)) & 0x07ff;
-    rc_ctrl->rc.ch[5] = ((sbus_buf[7] >> 7) | (sbus_buf[8] << 1) | (sbus_buf[9] << 9)) & 0x07ff;
-    rc_ctrl->rc.ch[6] = ((sbus_buf[9] >> 2) | (sbus_buf[10] << 6)) & 0x07ff;
-    rc_ctrl->rc.ch[7] = ((sbus_buf[10] >> 5) | (sbus_buf[11] << 3)) & 0x07ff;
-    rc_ctrl->rc.ch[8] = (sbus_buf[12] | (sbus_buf[13] << 8)) & 0x07ff;
-    rc_ctrl->rc.ch[9] = ((sbus_buf[13] >> 3) | (sbus_buf[14] << 5)) & 0x07ff;
-
-    rc_ctrl->rc.ch[0] = (rc_ctrl->rc.ch[0]-RC_CH_VALUE_OFFSET)/RC_CH_VALUE_MAX;
-    rc_ctrl->rc.ch[1] = (rc_ctrl->rc.ch[1]-RC_CH_VALUE_OFFSET)/RC_CH_VALUE_MAX;
-    rc_ctrl->rc.ch[2] = (rc_ctrl->rc.ch[2]-RC_CH_VALUE_OFFSET)/RC_CH_VALUE_MAX;
-    rc_ctrl->rc.ch[3] = (rc_ctrl->rc.ch[3]-RC_CH_VALUE_OFFSET)/RC_CH_VALUE_MAX;
-    rc_ctrl->rc.ch[4] = (rc_ctrl->rc.ch[4]-RC_CH_VALUE_OFFSET)/RC_CH_VALUE_MAX;
-    rc_ctrl->rc.ch[5] = (rc_ctrl->rc.ch[5]-RC_CH_VALUE_OFFSET)/RC_CH_VALUE_MAX;
-    rc_ctrl->rc.ch[6] = (rc_ctrl->rc.ch[6]-RC_CH_VALUE_OFFSET)/RC_CH_VALUE_MAX;
-    rc_ctrl->rc.ch[7] = (rc_ctrl->rc.ch[7]-RC_CH_VALUE_OFFSET)/RC_CH_VALUE_MAX;
-    rc_ctrl->rc.ch[8] = (rc_ctrl->rc.ch[8]-RC_CH_VALUE_OFFSET)/RC_CH_VALUE_MAX;
-    rc_ctrl->rc.ch[9] = (rc_ctrl->rc.ch[9]-RC_CH_VALUE_OFFSET)/RC_CH_VALUE_MAX;
+  }
 }
