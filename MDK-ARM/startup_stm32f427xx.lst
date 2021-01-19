@@ -877,12 +877,11 @@ ARM Macro Assembler    Page 14
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp.sp --apcs=
 interwork --depend=ares-robocon2021\startup_stm32f427xx.d -oares-robocon2021\st
-artup_stm32f427xx.o -I..\Core\Inc -I.\RTE\_ARES-Robocon2021 -IC:\Users\ZouYu\Ap
-pData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include -IC:\Users\ZouYu\AppDa
-ta\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.15.0\Drivers\CMSIS\Device\ST\STM32F4xx\
-Include --predefine="__UVISION_VERSION SETA 529" --predefine="_RTE_ SETA 1" --p
-redefine="STM32F427xx SETA 1" --list=startup_stm32f427xx.lst startup_stm32f427x
-x.s
+artup_stm32f427xx.o -I..\Core\Inc -I.\RTE\_ARES-Robocon2021 -ID:\keilpake\ARM\C
+MSIS\5.7.0\CMSIS\Core\Include -ID:\keilpake\Keil\STM32F4xx_DFP\2.15.0\Drivers\C
+MSIS\Device\ST\STM32F4xx\Include --predefine="__UVISION_VERSION SETA 529" --pre
+define="_RTE_ SETA 1" --predefine="STM32F427xx SETA 1" --list=startup_stm32f427
+xx.lst startup_stm32f427xx.s
 
 
 

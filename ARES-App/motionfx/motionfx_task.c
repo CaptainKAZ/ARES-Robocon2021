@@ -95,7 +95,7 @@ static HAL_StatusTypeDef MPU_SPI_speed_change(SPI_HandleTypeDef *hspi) {
   return HAL_OK;
 }
 
-void motionfx_task(void *pvParameters) {
+/*void motionfx_task(void *pvParameters) {
   TickType_t last_wake_time;
   float      delta_time;
   //延迟等待系统稳定
@@ -137,6 +137,7 @@ void motionfx_task(void *pvParameters) {
     }
   }
 }
+*/
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
   if (GPIO_Pin == MPU_DRDY_Pin) {

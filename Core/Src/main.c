@@ -26,11 +26,13 @@
 #include "rng.h"
 #include "spi.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "remote_control.h"
+#include "bsp_rc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,6 +64,7 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+    const RC_ctrl_t *local_rc_ctrl;
 
 /* USER CODE END 0 */
 
@@ -72,7 +75,7 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+    
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -100,8 +103,18 @@ int main(void)
   MX_SPI5_Init();
   MX_CRC_Init();
   MX_TIM1_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+    HAL_GPIO_WritePin(PWR0_GPIO_Port,PWR0_Pin,GPIO_PIN_SET);
+    HAL_Delay(100);
+    HAL_GPIO_WritePin(PWR1_GPIO_Port,PWR1_Pin,GPIO_PIN_SET);
+    HAL_Delay(100);
+    HAL_GPIO_WritePin(PWR2_GPIO_Port,PWR2_Pin,GPIO_PIN_SET);
+    HAL_Delay(100);
+    HAL_GPIO_WritePin(PWR3_GPIO_Port,PWR3_Pin,GPIO_PIN_SET);
 
+    remote_control_init();
+    local_rc_ctrl = get_remote_control_point();
   /* USER CODE END 2 */
 
   /* Init scheduler */
