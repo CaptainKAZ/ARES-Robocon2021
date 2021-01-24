@@ -9,24 +9,28 @@
   * 
   * @file     mpu6500driver.c
   * @author   Zou Yuanhao (11810102@mail.sustech.edu.cn)
-  * @brief    MPU6500«˝∂Ø
+  * @brief    MPU6500È©±Âä®
   * @version  0.1
   * @date     2020-12-06
   * 
   * ****************************(C) COPYRIGHT 2020 ARES@SUSTech****************************
   */
 
-#include "mpu6500driver.h"
-#include "mpu6500comm.h"
+#include "imu.h"
+#include "imu_comm.h"
 #include "mpu6500reg.h"
+#include "ist8310reg.h"
 
+#define IST8310_WHO_AM_I_VALUE 0x10
 #define DEVICE_ID MPU6500_ID
 
 #ifndef NULL
 #define NULL 0
 #endif
 
-//  Õ”¬›“«‘≠ º ˝æ›◊™ªª≥…rad/s Õ”¬›“«∑∂Œßø…“‘‘⁄hŒƒº˛÷––ﬁ∏ƒ
+#define MAG_SEN 0.3f //ËΩ¨Êç¢Êàê uT
+
+//  ÈôÄËû∫‰ª™ÂéüÂßãÊï∞ÊçÆËΩ¨Êç¢Êàêrad/s ÈôÄËû∫‰ª™ËåÉÂõ¥ÂèØ‰ª•Âú®hÊñá‰ª∂‰∏≠‰øÆÊîπ
 #ifdef MPU6500_GYRO_RANGE_2000
 #define MPU_GYRO_RANGLE MPU_GYRO_RANGLE_2000
 #define GYRO_SEN 0.00106526443603169529841533860381f
@@ -43,7 +47,7 @@
 #error "Please set the right range of gyro (2000 , 1000, 500 or 250)"
 #endif
 
-//  º”ÀŸ∂»º∆‘≠ º ˝æ›◊™ªª≥…m/s2 º”ÀŸ∂»º∆∑∂Œßø…“‘‘⁄hŒƒº˛÷––ﬁ∏ƒ
+//  Âä†ÈÄüÂ∫¶ËÆ°ÂéüÂßãÊï∞ÊçÆËΩ¨Êç¢Êàêm/s2 Âä†ÈÄüÂ∫¶ËÆ°ËåÉÂõ¥ÂèØ‰ª•Âú®hÊñá‰ª∂‰∏≠‰øÆÊîπ
 #ifdef MPU6500_ACCEL_RANGE_2G
 #define MPU_ACCEL_RANGLE MPU_ACCEL_RANGLE_2G
 #define ACCEL_SEN 0.00059814453125f
@@ -66,9 +70,10 @@
 #define MPU6500_TEMPERATURE_FACTOR 0.002f
 #define MPU6500_TEMPERATURE_OFFSET 23.0f
 
-#define MPU6500_Write_Reg_Num 14
+#define MPU_INIT_REG_NUM 14
+#define IST_INIT_REG_NUM 4
 
-static const uint8_t mpu6500_init_reg_data_error[MPU6500_Write_Reg_Num][3] = {
+static const uint8_t mpu_init_reg_data_error[MPU_INIT_REG_NUM][3] = {
     {MPU_PWR_MGMT_1,
      (((~MPU_DEVICE_RESET) & (~MPU_SLEEP) & (~MPU_CYCLE) & (~MPU_GYRO_STANDBY) & (~MPU_TEMP_DISABLE)) & (MPU_CLKSEL_INTERNAL)),
      PWR_MGMT_1_ERROR},
@@ -80,7 +85,7 @@ static const uint8_t mpu6500_init_reg_data_error[MPU6500_Write_Reg_Num][3] = {
 
     {MPU_SMPLRT_DIV, MPU_SMPLRT_DIV_1, SMPLRT_DIV_ERROR},
 
-    {MPU_CONFIG, ((~MPU_FIFO_MODE_OFF_REPLACE_OLD_DATA) & (MPU_EXT_SYNC_DISABLE | MPU_DLPF_CFG_0_SET)), CONFIG_ERROR},
+    {MPU_CONFIG, ((~MPU_FIFO_MODE_OFF_REPLACE_OLD_DATA) & (MPU_EXT_SYNC_DISABLE | MPU_DLPF_CFG_1_SET)), CONFIG_ERROR},
 
     {MPU_GYRO_CONFIG, (((~MPU_XG_SELF_TEST_SET) & (~MPU_YG_SELF_TEST_SET) & (~MPU_ZG_SELF_TEST_SET)) & (MPU_GYRO_RANGLE)),
      GYRO_CONFIG_ERROR},
@@ -88,12 +93,12 @@ static const uint8_t mpu6500_init_reg_data_error[MPU6500_Write_Reg_Num][3] = {
     {MPU_ACCEL_CONFIG, (((~MPU_XA_SELF_TEST_SET) & (~MPU_YA_SELF_TEST_SET) & (~MPU_ZA_SELF_TEST_SET)) & (MPU_ACCEL_RANGLE)),
      ACCEL_CONFIG_ERROR},
 
-    {MPU_ACCEL_CONFIG_2, (MPU_ACCEL_FCHOICE_B_0_SET | MPU_A_DLPL_CFG_0_SET), ACCEL_CONFIG_2_ERROR},
+    {MPU_ACCEL_CONFIG_2, (MPU_ACCEL_FCHOICE_B_0_SET | MPU_A_DLPL_CFG_2_SET), ACCEL_CONFIG_2_ERROR},
 
     {MPU_WOM_THR, WOM_THR_SET, MOT_DETECT_CTRL_ERROR},
 
     {MPU_I2C_MST_CTRL,
-     (((~MPU_MULT_MST_EN) & (~MPU_SLV_3_FIFO_EN) & (~MPU_I2C_MST_P_NSR)) & (~MPU_WAIT_FOR_ES_EN | MPU_I2C_MST_CLK_400_KHZ)),
+     (((~MPU_MULT_MST_EN) & (~MPU_SLV_3_FIFO_EN) & (~MPU_I2C_MST_P_NSR)) & (MPU_WAIT_FOR_ES_EN) & (MPU_I2C_MST_CLK_400_KHZ)),
      I2C_MST_CTRL_ERROR},
 
     {MPU_INTBP_CFG,
@@ -114,8 +119,10 @@ static const uint8_t mpu6500_init_reg_data_error[MPU6500_Write_Reg_Num][3] = {
      USER_CTRL_ERROR},
 
 };
+static const uint8_t ist8310_write_reg_data_error[IST_INIT_REG_NUM][3] = {
+    {0x0B, 0x08, 0x01}, {0x41, 0x09, 0x02}, {0x42, 0xC0, 0x03}, {0x0A, 0x0B, 0x03}};
 
-uint8_t mpu6500_init(void) {
+uint8_t mpu_init(void) {
   uint8_t res       = 0;
   uint8_t wait_time = 1;
   uint8_t sleepTime = 50;
@@ -123,42 +130,75 @@ uint8_t mpu6500_init(void) {
   uint8_t writeNum = 0;
 
   //check commiunication is normal
-  mpu6500_read_single_reg(MPU_WHO_AM_I);
+  mpu_read_reg(MPU_WHO_AM_I);
   HAL_Delay(wait_time);
-  mpu6500_read_single_reg(MPU_WHO_AM_I);
+  mpu_read_reg(MPU_WHO_AM_I);
   HAL_Delay(wait_time);
 
-  mpu6500_write_single_reg(MPU_PWR_MGMT_1, MPU_DEVICE_RESET);
+  mpu_write_reg(MPU_PWR_MGMT_1, MPU_DEVICE_RESET);
   HAL_Delay(sleepTime);
 
   //check commiunication is normal after reset
-  mpu6500_read_single_reg(MPU_WHO_AM_I);
+  mpu_read_reg(MPU_WHO_AM_I);
   HAL_Delay(wait_time);
-  mpu6500_read_single_reg(MPU_WHO_AM_I);
+  mpu_read_reg(MPU_WHO_AM_I);
   HAL_Delay(wait_time);
 
   //read the register "WHO AM I"
-  res = mpu6500_read_single_reg(MPU_WHO_AM_I);
+  res = mpu_read_reg(MPU_WHO_AM_I);
   HAL_Delay(wait_time);
   if (res != DEVICE_ID) {
     return NO_Sensor;
   }
 
   //set mpu6500 sonsor config and check
-  for (writeNum = 0; writeNum < MPU6500_Write_Reg_Num; writeNum++) {
-    mpu6500_write_single_reg(mpu6500_init_reg_data_error[writeNum][0], mpu6500_init_reg_data_error[writeNum][1]);
+  for (writeNum = 0; writeNum < MPU_INIT_REG_NUM; writeNum++) {
+    mpu_write_reg(mpu_init_reg_data_error[writeNum][0], mpu_init_reg_data_error[writeNum][1]);
     HAL_Delay(wait_time);
-    res = mpu6500_read_single_reg(mpu6500_init_reg_data_error[writeNum][0]);
+    res = mpu_read_reg(mpu_init_reg_data_error[writeNum][0]);
     HAL_Delay(wait_time);
-    if (res != mpu6500_init_reg_data_error[writeNum][1]) {
-      return mpu6500_init_reg_data_error[writeNum][2];
+    if (res != mpu_init_reg_data_error[writeNum][1]) {
+      return mpu_init_reg_data_error[writeNum][2];
     }
   }
   // NO error
   return MPU6500_NO_ERROR;
 }
 
-void mpu6500_get_data(uint8_t *status_buf, mpu6500_real_data_t *mpu6500_real_data) {
+uint8_t ist_init(void) {
+  static const uint8_t wait_time = 2;
+  static const uint8_t sleepTime = 50;
+  uint8_t              res       = 0;
+  uint8_t              writeNum  = 0;
+
+  IST_RST_L();
+  HAL_Delay(sleepTime);
+  HAL_Delay(sleepTime);
+  IST_RST_H();
+
+  res = ist_read_reg(IST8310_WHO_AM_I);
+  if (res != IST8310_WHO_AM_I_VALUE) {
+    return IST8310_NO_SENSOR;
+  }
+
+  //set mpu6500 sonsor config and check
+  for (writeNum = 0; writeNum < IST_INIT_REG_NUM; writeNum++) {
+    ist_write_reg(ist8310_write_reg_data_error[writeNum][0], ist8310_write_reg_data_error[writeNum][1]);
+    HAL_Delay(wait_time);
+    res = ist_read_reg(ist8310_write_reg_data_error[writeNum][0]);
+    HAL_Delay(wait_time);
+    if (res != ist8310_write_reg_data_error[writeNum][1]) {
+      return ist8310_write_reg_data_error[writeNum][2];
+    }
+  }
+  ist_auto_comm();
+
+  return IST8310_NO_ERROR;
+}
+
+
+
+void mpu_get_data(uint8_t *status_buf, mpu_real_data_t *mpu6500_real_data) {
   // check point null
   if (status_buf == NULL || mpu6500_real_data == NULL) {
     return;
@@ -199,35 +239,28 @@ void mpu6500_get_data(uint8_t *status_buf, mpu6500_real_data_t *mpu6500_real_dat
   }
 }
 
-/**
- * @description: Õ”¬›“«–£◊º∫Ø ˝ µ±ø™∑¢∞Âæ≤÷π ±–£◊ºÕ”¬›“« ∑Ò‘Ú«Â¡„–£◊ºº∆ ±
- * @param gyro_offset[3] µ±«∞∆´“∆¡ø 
- * @param gyro[3] µ±«∞≤‚¡ø¡ø 
- * @param imu_status imu◊¥Ã¨ºƒ¥Ê∆˜
- * @param offset_time_count –£◊ºº∆ ±÷∏’Î
- */
-void gyro_offset(fp32 gyro_offset[3], fp32 gyro[3], uint8_t imu_status, uint16_t *offset_time_count) {
-  if (gyro_offset == NULL || gyro == NULL || offset_time_count == NULL) {
-    return;
-  }
+void ist_get_data(uint8_t *status_buf, ist_real_data_t *ist8310_real_data) {
+  if (status_buf[0] & 0x01) {
+    int16_t temp_ist8310_data = 0;
+    ist8310_real_data->status |= 1 << IST8310_DATA_READY_BIT;
 
-  if (imu_status & (1 << MPU_MOT_BIT)) {
-    (*offset_time_count) = 0;
-    return;
-  }
-
-  if (imu_status & (1 << MPU_DATA_READY_BIT)) {
-    gyro_offset[0] = gyro_offset[0] - GYRO_OFFSET_KP * gyro[0];
-    gyro_offset[1] = gyro_offset[1] - GYRO_OFFSET_KP * gyro[1];
-    gyro_offset[2] = gyro_offset[2] - GYRO_OFFSET_KP * gyro[2];
-    (*offset_time_count)++;
+    temp_ist8310_data         = (int16_t)((status_buf[2] << 8) | status_buf[1]);
+    ist8310_real_data->mag[0] = MAG_SEN * temp_ist8310_data;
+    temp_ist8310_data         = (int16_t)((status_buf[4] << 8) | status_buf[3]);
+    ist8310_real_data->mag[1] = MAG_SEN * temp_ist8310_data;
+    temp_ist8310_data         = (int16_t)((status_buf[6] << 8) | status_buf[5]);
+    ist8310_real_data->mag[2] = MAG_SEN * temp_ist8310_data;
+  } else {
+    ist8310_real_data->status &= ~(1 << IST8310_DATA_READY_BIT);
   }
 }
 
-void mpu6500_read_gyro(fp32 gyro[3]) {
+
+
+void mpu_read_gyro(fp32 gyro[3]) {
   uint8_t buf[6];
   int16_t temp_imu_data = 0;
-  mpu6500_read_muli_reg(MPU_GYRO_XOUT_H, buf, 6);
+  mpu_read_regs(MPU_GYRO_XOUT_H, buf, 6);
 
   temp_imu_data = (int16_t)((buf[0]) << 8) | buf[1];
   gyro[0]       = temp_imu_data * GYRO_SEN;
@@ -237,10 +270,10 @@ void mpu6500_read_gyro(fp32 gyro[3]) {
   gyro[2]       = temp_imu_data * GYRO_SEN;
 }
 
-void mpu6500_read_accel(fp32 accel[3]) {
+void mpu_read_accel(fp32 accel[3]) {
   uint8_t buf[6];
   int16_t temp_imu_data = 0;
-  mpu6500_read_muli_reg(MPU_ACCEL_XOUT_H, buf, 6);
+  mpu_read_regs(MPU_ACCEL_XOUT_H, buf, 6);
 
   temp_imu_data = (int16_t)((buf[0]) << 8) | buf[1];
   accel[0]      = temp_imu_data * ACCEL_SEN;
@@ -250,12 +283,25 @@ void mpu6500_read_accel(fp32 accel[3]) {
   accel[2]      = temp_imu_data * ACCEL_SEN;
 }
 
-void mpu6500_read_temp(fp32 *temperature) {
+void mpu_read_temp(fp32 *temperature) {
   uint8_t buf[2];
   int16_t temp_imu_data = 0;
-  mpu6500_read_muli_reg(MPU_TEMP_OUT_H, buf, 2);
+  mpu_read_regs(MPU_TEMP_OUT_H, buf, 2);
 
   temp_imu_data = (int16_t)((buf[0]) << 8) | buf[1];
 
   *temperature = temp_imu_data * MPU6500_TEMPERATURE_FACTOR + MPU6500_TEMPERATURE_OFFSET;
+}
+
+void ist_read_mag(fp32 mag[3]) {
+  uint8_t buf[6];
+  int16_t temp_ist8310_data = 0;
+  ist_read_regs(0x02, buf, 6);
+
+  temp_ist8310_data = (int16_t)((buf[1] << 8) | buf[0]);
+  mag[0]            = MAG_SEN * temp_ist8310_data;
+  temp_ist8310_data = (int16_t)((buf[3] << 8) | buf[2]);
+  mag[1]            = MAG_SEN * temp_ist8310_data;
+  temp_ist8310_data = (int16_t)((buf[5] << 8) | buf[4]);
+  mag[2]            = MAG_SEN * temp_ist8310_data;
 }

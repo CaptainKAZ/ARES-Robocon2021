@@ -22,6 +22,7 @@
 #define SPI_BUF_SIZE 23
 #define MFX_UPDATE_INTERVAL 1U
 #define MFX_DATA_ADDRESS 0x80E0000
+#define STANDART_G 9.80665f
 
 extern void motionfx_task(void *pvParameters);
 

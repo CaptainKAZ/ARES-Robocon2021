@@ -446,6 +446,9 @@ void can_communication_task(void *pvParameters) {
   }
 }
 
+int16_t max_time=10;
+uint16_t speed=1100;
+
 void quick_test_task(void *argument) {
   /* USER CODE BEGIN test_throw */
   vTaskDelay(2000);
@@ -459,22 +462,24 @@ void quick_test_task(void *argument) {
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
   vTaskDelay(5000);
-  static int8_t times = 5;
+  static int16_t times = 10;
   while (1) {
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 1500);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 1500);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 1500);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 1500);
-    if (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == SET) {
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, speed);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, speed);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, speed);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, speed);
+    if (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == SET||times!=max_time) {
       if (times-- > 0) {
-        motor_set_current(1, 16000);
+        motor_set_current(1, 16384);
       } else {
-        motor_set_current(1, -16000);
-        times = -1;
+        motor_set_current(1, -16384);
+        if(HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == RESET&&times<-3*max_time){
+          times = max_time;
+        }
       }
     } else {
       motor_set_current(1, -2000);
-      times = 5;
+      times = max_time;
     }
     vTaskDelay(5);
   }

@@ -2,21 +2,19 @@
 #define USER_LIB_H
 #include "main.h"
 
-typedef __packed struct
-{
-    fp32 input;        //输入数据
-    fp32 out;          //输出数据
-    fp32 min_value;    //限幅最小值
-    fp32 max_value;    //限幅最大值
-    fp32 frame_period; //时间间隔
+typedef __packed struct {
+  fp32 input;        //输入数据
+  fp32 out;          //输出数据
+  fp32 min_value;    //限幅最小值
+  fp32 max_value;    //限幅最大值
+  fp32 frame_period; //时间间隔
 } ramp_function_source_t;
 
-typedef __packed struct
-{
-    fp32 input;        //输入数据
-    fp32 out;          //滤波输出的数据
-    fp32 num[1];       //滤波参数
-    fp32 frame_period; //滤波的时间间隔 单位 s
+typedef __packed struct {
+  fp32 input;        //输入数据
+  fp32 out;          //滤波输出的数据
+  fp32 num[1];       //滤波参数
+  fp32 frame_period; //滤波的时间间隔 单位 s
 } first_order_filter_type_t;
 //快速开方
 extern fp32 invSqrt(fp32 num);
@@ -47,7 +45,7 @@ extern fp32 loop_fp32_constrain(fp32 Input, fp32 minValue, fp32 maxValue);
 //角度 °限幅 180 ~ -180
 extern fp32 theta_format(fp32 Ang);
 //计算绝对值
-extern inline int8_t int8abs(int8_t value);
+extern inline int8_t  int8abs(int8_t value);
 extern inline int16_t int16abs(int16_t value);
 extern inline int32_t int32abs(int32_t value);
 extern inline fp32    fp32abs(fp32 value);
@@ -56,7 +54,10 @@ extern fp32 distance_2d(fp32 x1, fp32 y1, fp32 x2, fp32 y2);
 
 extern fp32 atan2_fast(fp32 x, fp32 y);
 
+#define RAD2DEG(x) (fp32)(x)*(57.295779513082320876798154814105f)
+
 //弧度格式化为-PI~PI
 #define rad_format(Ang) loop_fp32_constrain((Ang), -PI, PI)
-
+//判断是否在中断状态下
+extern inline int is_in_isr(void);
 #endif

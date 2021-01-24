@@ -1,10 +1,10 @@
-#include "remote_control.h"
+#include "sbus.h"
 #include "usart.h"
 
 fp32           SBUS_CHANNEL[10];
 static uint8_t SBUS_rx_buf[2][SBUS_RX_BUF_NUM];
 
-static void SBUS_init(void) {
+void sbus_init(void) {
   //使能DMA串口接收
   SET_BIT(huart1.Instance->CR3, USART_CR3_DMAR);
   //使能串口空闲中断
@@ -29,7 +29,7 @@ static void SBUS_init(void) {
   __HAL_DMA_ENABLE(&hdma_usart1_rx);
 }
 
-static void parse_SBUS(volatile const uint8_t *sbus_buf) {
+static void parse_sbus(volatile const uint8_t *sbus_buf) {
   SBUS_CHANNEL[0] = (((sbus_buf[1] | (sbus_buf[2] << 8)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
   SBUS_CHANNEL[1] = ((((sbus_buf[2] >> 3) | (sbus_buf[3] << 5)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
   SBUS_CHANNEL[2] =
@@ -56,13 +56,13 @@ void USART1_IRQHandler(void) {
     hdma_usart1_rx.Instance->CR |= DMA_SxCR_CT;
     __HAL_DMA_ENABLE(&hdma_usart1_rx);
     if (this_time_rx_len == RC_FRAME_LENGTH) {
-      parse_SBUS(SBUS_rx_buf[0]);
+      parse_sbus(SBUS_rx_buf[0]);
     }
   } else {
     hdma_usart1_rx.Instance->CR &= ~(DMA_SxCR_CT);
     __HAL_DMA_ENABLE(&hdma_usart1_rx);
     if (this_time_rx_len == RC_FRAME_LENGTH) {
-      parse_SBUS(SBUS_rx_buf[1]);
+      parse_sbus(SBUS_rx_buf[1]);
     }
   }
 }

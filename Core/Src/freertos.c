@@ -69,6 +69,13 @@ const osThreadAttr_t MotionFXTask_attributes = {
   .priority = (osPriority_t) osPriorityRealtime7,
   .stack_size = 1024 * 4
 };
+/* Definitions for StateSteaming */
+osThreadId_t StateSteamingHandle;
+const osThreadAttr_t StateSteaming_attributes = {
+  .name = "StateSteaming",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -78,6 +85,7 @@ const osThreadAttr_t MotionFXTask_attributes = {
 void can_communication_task(void *argument);
 void quick_test_task(void *argument);
 void motionfx_task(void *argument);
+void state_steaming_task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -116,6 +124,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of MotionFXTask */
   MotionFXTaskHandle = osThreadNew(motionfx_task, NULL, &MotionFXTask_attributes);
+
+  /* creation of StateSteaming */
+  StateSteamingHandle = osThreadNew(state_steaming_task, NULL, &StateSteaming_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -175,6 +186,24 @@ __weak void motionfx_task(void *argument)
     osDelay(1);
   }
   /* USER CODE END motionfx_task */
+}
+
+/* USER CODE BEGIN Header_state_steaming_task */
+/**
+* @brief Function implementing the StateSteaming thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_state_steaming_task */
+__weak void state_steaming_task(void *argument)
+{
+  /* USER CODE BEGIN state_steaming_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END state_steaming_task */
 }
 
 /* Private application code --------------------------------------------------*/

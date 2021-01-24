@@ -24,4 +24,4 @@
 /* sigle measure mode */
 #define IST8310_ODR_MODE 0x01
 
-#endif // __IST8310_REG_H__
+#endif
