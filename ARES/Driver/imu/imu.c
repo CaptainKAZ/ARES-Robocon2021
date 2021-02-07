@@ -28,38 +28,38 @@
 #define NULL 0
 #endif
 
-#define MAG_SEN 0.3f //转换成 uT
+#define MAG_SEN 0.006f //转换成 uT/50
 
-//  陀螺仪原始数据转换成rad/s 陀螺仪范围可以在h文件中修改
+//  陀螺仪原始数据转换成dps 陀螺仪范围可以在h文件中修改
 #ifdef MPU6500_GYRO_RANGE_2000
 #define MPU_GYRO_RANGLE MPU_GYRO_RANGLE_2000
-#define GYRO_SEN 0.00106526443603169529841533860381f
+#define GYRO_SEN 0.06103515625f
 #elif defined(MPU6500_GYRO_RANGE_1000)
 #define MPU_GYRO_RANGLE MPU_GYRO_RANGLE_1000
-#define GYRO_SEN 0.0005326322180158476492076f
+#define GYRO_SEN 0.030517578125f
 #elif defined(MPU6500_GYRO_RANGE_500)
 #define MPU_GYRO_RANGLE MPU_GYRO_RANGLE_500
-#define GYRO_SEN 0.0002663161090079238246038f
+#define GYRO_SEN 0.0152587890625f
 #elif defined(MPU6500_GYRO_RANGE_250)
 #define MPU_GYRO_RANGLE MPU_GYRO_RANGLE_250
-#define GYRO_SEN 0.000133158054503961923019f
+#define GYRO_SEN 0.00762939453125f
 #else
 #error "Please set the right range of gyro (2000 , 1000, 500 or 250)"
 #endif
 
-//  加速度计原始数据转换成m/s2 加速度计范围可以在h文件中修改
+//  加速度计原始数据转换成g 加速度计范围可以在h文件中修改
 #ifdef MPU6500_ACCEL_RANGE_2G
 #define MPU_ACCEL_RANGLE MPU_ACCEL_RANGLE_2G
-#define ACCEL_SEN 0.00059814453125f
+#define ACCEL_SEN 0.00006103515625f
 #elif defined(MPU6500_ACCEL_RANGE_4G)
 #define MPU_ACCEL_RANGLE MPU_ACCEL_RANGLE_4G
-#define ACCEL_SEN 0.0011962890625f
+#define ACCEL_SEN 0.0001220703125f
 #elif defined(MPU6500_ACCEL_RANGE_8G)
 #define MPU_ACCEL_RANGLE MPU_ACCEL_RANGLE_8G
-#define ACCEL_SEN 0.002392578125f
-#elif defined(MPU6500_ACCEL_RANGE_4G)
-#define MPU_ACCEL_RANGLE MPU_ACCEL_RANGLE_4G
-#define ACCEL_SEN 0.00478515625f
+#define ACCEL_SEN 0.000244140625f
+#elif defined(MPU6500_ACCEL_RANGE_16G)
+#define MPU_ACCEL_RANGLE MPU_ACCEL_RANGLE_16G
+#define ACCEL_SEN 0.00048828125f
 #else
 #error "Please set the right range of accel (16G , 8G, 4G or 2G)"
 #endif
@@ -196,8 +196,6 @@ uint8_t ist_init(void) {
   return IST8310_NO_ERROR;
 }
 
-
-
 void mpu_get_data(uint8_t *status_buf, mpu_real_data_t *mpu6500_real_data) {
   // check point null
   if (status_buf == NULL || mpu6500_real_data == NULL) {
@@ -254,8 +252,6 @@ void ist_get_data(uint8_t *status_buf, ist_real_data_t *ist8310_real_data) {
     ist8310_real_data->status &= ~(1 << IST8310_DATA_READY_BIT);
   }
 }
-
-
 
 void mpu_read_gyro(fp32 gyro[3]) {
   uint8_t buf[6];

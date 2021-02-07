@@ -47,15 +47,15 @@ static uint8_t             counter                  = 2;
 
 static void MotionFX_get_input(MFX_input_t *MFX_input, mpu_real_data_t *mpu6500_real_data,
                                ist_real_data_t *ist8310_real_data) {
-  MFX_input->acc[0]  = mpu6500_real_data->accel[0] / STANDART_G;
-  MFX_input->acc[1]  = mpu6500_real_data->accel[1] / STANDART_G;
-  MFX_input->acc[2]  = mpu6500_real_data->accel[2] / STANDART_G;
-  MFX_input->gyro[0] = RAD2DEG(mpu6500_real_data->gyro[0]);
-  MFX_input->gyro[1] = RAD2DEG(mpu6500_real_data->gyro[1]);
-  MFX_input->gyro[2] = RAD2DEG(mpu6500_real_data->gyro[2]);
-  MFX_input->mag[0]  = ist8310_real_data->mag[0] / 50 - mag_cal_out.hi_bias[0];
-  MFX_input->mag[1]  = ist8310_real_data->mag[1] / 50 - mag_cal_out.hi_bias[1];
-  MFX_input->mag[2]  = ist8310_real_data->mag[2] / 50 - mag_cal_out.hi_bias[2];
+  MFX_input->acc[0]  = mpu6500_real_data->accel[0];
+  MFX_input->acc[1]  = mpu6500_real_data->accel[1];
+  MFX_input->acc[2]  = mpu6500_real_data->accel[2];
+  MFX_input->gyro[0] = mpu6500_real_data->gyro[0];
+  MFX_input->gyro[1] = mpu6500_real_data->gyro[1];
+  MFX_input->gyro[2] = mpu6500_real_data->gyro[2];
+  MFX_input->mag[0]  = ist8310_real_data->mag[0] - mag_cal_out.hi_bias[0];
+  MFX_input->mag[1]  = ist8310_real_data->mag[1] - mag_cal_out.hi_bias[1];
+  MFX_input->mag[2]  = ist8310_real_data->mag[2] - mag_cal_out.hi_bias[2];
 }
 
 static void MotionFX_MagCal_get_input(MFX_MagCal_input_t *mag_cal_in, ist_real_data_t *ist8310_real_data) {
