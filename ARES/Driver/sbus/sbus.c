@@ -44,7 +44,11 @@ static void parse_sbus(volatile const uint8_t *sbus_buf) {
   SBUS_CHANNEL[9] = ((((sbus_buf[13] >> 3) | (sbus_buf[14] << 5)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
 }
 
-void USART1_IRQHandler(void) {
+/**
+  * @brief    遥控器更新的钩子函数
+  * 
+  */
+void sbus_hook(void) {
   static uint16_t this_time_rx_len = 0;
 
   __HAL_UART_CLEAR_PEFLAG(&huart1);
