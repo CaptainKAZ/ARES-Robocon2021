@@ -27,7 +27,10 @@
 		"C_Cpp.default.cStandard": "c11",
 		"C_Cpp.default.cppStandard": "gnu++17",
 		"C_Cpp.default.intelliSenseMode": "clang-arm",
-		"editor.detectIndentation": false,
+    "editor.detectIndentation": false,
+    "files.associations": {
+      "usart.h": "c"
+    },
 	},
 	"extensions": {
 		"recommendations": [
