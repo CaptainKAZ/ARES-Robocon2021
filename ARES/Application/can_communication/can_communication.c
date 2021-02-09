@@ -446,8 +446,8 @@ void can_communication_task(void *pvParameters) {
   }
 }
 
-int16_t max_time=10;
-uint16_t speed=1100;
+int16_t max_time=15;
+uint16_t speed=1400;
 
 void quick_test_task(void *argument) {
   /* USER CODE BEGIN test_throw */

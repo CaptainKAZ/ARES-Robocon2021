@@ -20,10 +20,10 @@
 #define STOPWATCH_H
 #include "main.h"
 
-typedef _packed struct stopwatch_t {
-  int32_t      last_us; //计时开始时候TIM6_CNT的值
-  int32_t      dms;     //每次TIM6上溢中断(10ms)的时候+1
-  uint8_t      enable;  //是否开启该定时器
+typedef struct stopwatch_t {
+  int32_t      last_us;        //计时开始时候TIM6_CNT的值
+  int32_t      dms : 31;       //每次TIM6上溢中断(10ms)的时候+1
+  uint8_t      enable : 1;     //是否开启该定时器
   stopwatch_t *next_stopwatch; //指向下一个定时器的指针
 } stopwatch_t;
 

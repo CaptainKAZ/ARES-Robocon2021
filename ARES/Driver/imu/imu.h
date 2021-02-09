@@ -8,6 +8,9 @@
 #define MPU_DATA_READY_BIT 0 //陀螺仪数据准备
 #define MPU_MOT_BIT 1        //mpu6500 运动检测
 #define IST8310_DATA_READY_BIT 2
+#define SPI_BUF_SIZE 23
+#define MPU_DATA_OFFSET 1
+#define IST_DATA_OFFSET 16
 
 typedef enum {
   MPU6500_NO_ERROR         = 0x00,
@@ -56,11 +59,13 @@ typedef struct ist_real_data_t {
   fp32    mag[3];
 } ist_real_data_t;
 
+extern uint8_t SPI_RX_buf[SPI_BUF_SIZE];
+extern uint8_t SPI_TX_buf[SPI_BUF_SIZE];
 
 extern uint8_t mpu_init(void);
-extern void    mpu_get_data(uint8_t *status_buf, mpu_real_data_t *mpu6500_real_data);
+extern void    imu_get_data(mpu_real_data_t *mpu6500_real_data, ist_real_data_t *ist8310_real_data);
 extern uint8_t ist_init(void);
 extern void    ist_get_data(uint8_t *status_buf, ist_real_data_t *mpu6500_real_data);
 extern void    ist_read_mag(fp32 mag[3]);
-
+extern void   imu_DMA_read(void);
 #endif

@@ -19,6 +19,7 @@
 #define IMU_COMM_H
 
 #include "main.h"
+#include "spi.h"
 
 #define MPU_NSS_H() HAL_GPIO_WritePin(MPU_NSS_GPIO_Port, MPU_NSS_Pin, GPIO_PIN_SET)
 #define MPU_NSS_L() HAL_GPIO_WritePin(MPU_NSS_GPIO_Port, MPU_NSS_Pin, GPIO_PIN_RESET)

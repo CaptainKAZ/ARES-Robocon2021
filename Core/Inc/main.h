@@ -60,6 +60,15 @@ typedef signed long long   int64_t;
 #ifndef PI
 #define PI 3.141592653589793238462643383279f
 #endif
+#ifndef ARES_HEX
+#define ARES_HEX 0x41524553
+#endif
+#ifndef SUCCESS
+#define SUCCESS 1
+#endif
+#ifndef FAIL
+#define FAIL 0
+#endif
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

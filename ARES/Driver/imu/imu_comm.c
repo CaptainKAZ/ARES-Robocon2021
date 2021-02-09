@@ -18,7 +18,6 @@
 
 #include "imu_comm.h"
 #include "FreeRTOS.h"
-#include "spi.h"
 #include "mpu6500reg.h"
 #include "ist8310reg.h"
 

@@ -29,7 +29,9 @@
 		"C_Cpp.default.intelliSenseMode": "clang-arm",
     "editor.detectIndentation": false,
     "files.associations": {
-      "usart.h": "c"
+      "usart.h": "c",
+      "imu_comm.h": "c",
+      "stopwatch.h": "c"
     },
 	},
 	"extensions": {

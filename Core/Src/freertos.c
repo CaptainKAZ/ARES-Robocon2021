@@ -62,10 +62,10 @@ const osThreadAttr_t QuickTestTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 128 * 4
 };
-/* Definitions for MotionFXTask */
-osThreadId_t MotionFXTaskHandle;
-const osThreadAttr_t MotionFXTask_attributes = {
-  .name = "MotionFXTask",
+/* Definitions for INSTask */
+osThreadId_t INSTaskHandle;
+const osThreadAttr_t INSTask_attributes = {
+  .name = "INSTask",
   .priority = (osPriority_t) osPriorityRealtime7,
   .stack_size = 1024 * 4
 };
@@ -84,7 +84,7 @@ const osThreadAttr_t StateSteaming_attributes = {
 
 void can_communication_task(void *argument);
 void quick_test_task(void *argument);
-void motionfx_task(void *argument);
+void INS_task(void *argument);
 void state_steaming_task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -122,8 +122,8 @@ void MX_FREERTOS_Init(void) {
   /* creation of QuickTestTask */
   QuickTestTaskHandle = osThreadNew(quick_test_task, NULL, &QuickTestTask_attributes);
 
-  /* creation of MotionFXTask */
-  MotionFXTaskHandle = osThreadNew(motionfx_task, NULL, &MotionFXTask_attributes);
+  /* creation of INSTask */
+  INSTaskHandle = osThreadNew(INS_task, NULL, &INSTask_attributes);
 
   /* creation of StateSteaming */
   StateSteamingHandle = osThreadNew(state_steaming_task, NULL, &StateSteaming_attributes);
@@ -170,22 +170,22 @@ __weak void quick_test_task(void *argument)
   /* USER CODE END quick_test_task */
 }
 
-/* USER CODE BEGIN Header_motionfx_task */
+/* USER CODE BEGIN Header_INS_task */
 /**
-* @brief Function implementing the MotionFXTask thread.
+* @brief Function implementing the INSTask thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_motionfx_task */
-__weak void motionfx_task(void *argument)
+/* USER CODE END Header_INS_task */
+__weak void INS_task(void *argument)
 {
-  /* USER CODE BEGIN motionfx_task */
+  /* USER CODE BEGIN INS_task */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END motionfx_task */
+  /* USER CODE END INS_task */
 }
 
 /* USER CODE BEGIN Header_state_steaming_task */

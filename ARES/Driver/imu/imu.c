@@ -28,7 +28,7 @@
 #define NULL 0
 #endif
 
-#define MAG_SEN 0.006f //转换成 uT/50
+#define MAG_SEN 0.3f //转换成 uT
 
 //  陀螺仪原始数据转换成dps 陀螺仪范围可以在h文件中修改
 #ifdef MPU6500_GYRO_RANGE_2000
@@ -72,6 +72,9 @@
 
 #define MPU_INIT_REG_NUM 14
 #define IST_INIT_REG_NUM 4
+
+static uint8_t SPI_RX_buf[SPI_BUF_SIZE];
+static uint8_t SPI_TX_buf[SPI_BUF_SIZE] = {MPU_INT_STATUS | MPU_READ_MSB};
 
 static const uint8_t mpu_init_reg_data_error[MPU_INIT_REG_NUM][3] = {
     {MPU_PWR_MGMT_1,
@@ -119,7 +122,7 @@ static const uint8_t mpu_init_reg_data_error[MPU_INIT_REG_NUM][3] = {
      USER_CTRL_ERROR},
 
 };
-static const uint8_t ist8310_write_reg_data_error[IST_INIT_REG_NUM][3] = {
+static const uint8_t ist8310_init_reg_data_error[IST_INIT_REG_NUM][3] = {
     {0x0B, 0x08, 0x01}, {0x41, 0x09, 0x02}, {0x42, 0xC0, 0x03}, {0x0A, 0x0B, 0x03}};
 
 uint8_t mpu_init(void) {
@@ -183,12 +186,12 @@ uint8_t ist_init(void) {
 
   //set mpu6500 sonsor config and check
   for (writeNum = 0; writeNum < IST_INIT_REG_NUM; writeNum++) {
-    ist_write_reg(ist8310_write_reg_data_error[writeNum][0], ist8310_write_reg_data_error[writeNum][1]);
+    ist_write_reg(ist8310_init_reg_data_error[writeNum][0], ist8310_init_reg_data_error[writeNum][1]);
     HAL_Delay(wait_time);
-    res = ist_read_reg(ist8310_write_reg_data_error[writeNum][0]);
+    res = ist_read_reg(ist8310_init_reg_data_error[writeNum][0]);
     HAL_Delay(wait_time);
-    if (res != ist8310_write_reg_data_error[writeNum][1]) {
-      return ist8310_write_reg_data_error[writeNum][2];
+    if (res != ist8310_init_reg_data_error[writeNum][1]) {
+      return ist8310_init_reg_data_error[writeNum][2];
     }
   }
   ist_auto_comm();
@@ -196,12 +199,8 @@ uint8_t ist_init(void) {
   return IST8310_NO_ERROR;
 }
 
-void mpu_get_data(uint8_t *status_buf, mpu_real_data_t *mpu6500_real_data) {
-  // check point null
-  if (status_buf == NULL || mpu6500_real_data == NULL) {
-    return;
-  }
-
+void imu_get_data(mpu_real_data_t *mpu6500_real_data, ist_real_data_t *ist8310_real_data) {
+  uint8_t *status_buf = &SPI_RX_buf[MPU_DATA_OFFSET];
   if ((*status_buf) & MPU_INT_WOM_INT) {
     mpu6500_real_data->status |= (uint8_t)(1 << MPU_MOT_BIT);
   }
@@ -235,9 +234,7 @@ void mpu_get_data(uint8_t *status_buf, mpu_real_data_t *mpu6500_real_data) {
     temp_imu_data              = (int16_t)((status_buf[13]) << 8) | status_buf[14];
     mpu6500_real_data->gyro[2] = temp_imu_data * GYRO_SEN;
   }
-}
-
-void ist_get_data(uint8_t *status_buf, ist_real_data_t *ist8310_real_data) {
+  status_buf = &SPI_RX_buf[IST_DATA_OFFSET];
   if (status_buf[0] & 0x01) {
     int16_t temp_ist8310_data = 0;
     ist8310_real_data->status |= 1 << IST8310_DATA_READY_BIT;
@@ -301,3 +298,5 @@ void ist_read_mag(fp32 mag[3]) {
   temp_ist8310_data = (int16_t)((buf[5] << 8) | buf[4]);
   mag[2]            = MAG_SEN * temp_ist8310_data;
 }
+
+void imu_DMA_read(void) { HAL_SPI_TransmitReceive_DMA(&hspi5, SPI_TX_buf, SPI_RX_buf, SPI_BUF_SIZE); }
