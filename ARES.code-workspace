@@ -31,7 +31,8 @@
     "files.associations": {
       "usart.h": "c",
       "imu_comm.h": "c",
-      "stopwatch.h": "c"
+      "stopwatch.h": "c",
+      "fsf.h": "c"
     },
 	},
 	"extensions": {

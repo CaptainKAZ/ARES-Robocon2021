@@ -67,5 +67,5 @@ extern void    imu_get_data(mpu_real_data_t *mpu6500_real_data, ist_real_data_t 
 extern uint8_t ist_init(void);
 extern void    ist_get_data(uint8_t *status_buf, ist_real_data_t *mpu6500_real_data);
 extern void    ist_read_mag(fp32 mag[3]);
-extern void   imu_DMA_read(void);
+extern void    imu_DMA_read(void);
 #endif

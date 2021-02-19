@@ -24,15 +24,6 @@ fp32 invSqrt(fp32 num) {
   */
 fp32 distance_2d(fp32 x1, fp32 y1, fp32 x2, fp32 y2) { return 1 / invSqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)); }
 
-/**
- * @description:   取绝对值函数，统一使用
- * @param    value 需要被取绝对值的数
- * @return:        绝对值
- */
-inline int8_t  int8abs(int8_t value) { return value > 0 ? value : -value; }
-inline int16_t int16abs(int16_t value) { return value > 0 ? value : -value; }
-inline int32_t int32abs(int32_t value) { return value > 0 ? value : -value; }
-inline fp32    fp32abs(fp32 value) { return value > 0 ? value : -value; }
 
 /**
  * @brief          斜波函数初始化

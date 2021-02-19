@@ -55,7 +55,12 @@ void tic(stopwatch_t *stopwatch) {
   * @param    stopwatch 计时器指针
   * @return   fp32      计时器时间，单位为秒
   */
-fp32 toc(stopwatch_t *stopwatch) { return 1e-2 * stopwatch->dms + 1e-6 * (stopwatch->last_us - htim6.Instance->CNT); }
+fp32 toc(stopwatch_t *stopwatch) {
+  if (stopwatch->enable)
+    return 1e-2 * stopwatch->dms + 1e-6 * (stopwatch->last_us - htim6.Instance->CNT);
+  else
+    return 0;
+}
 
 /**
   * @brief    停止计时器
@@ -64,9 +69,13 @@ fp32 toc(stopwatch_t *stopwatch) { return 1e-2 * stopwatch->dms + 1e-6 * (stopwa
   * @return   fp32      计时器停止时候的时间，单位为秒
   */
 fp32 stopwatch_disable(stopwatch_t *stopwatch) {
-  stopwatch->enable = DISABLE;
-  stopwatch->dms    = 0;
-  return 1e-2 * stopwatch->dms + 1e-6 * (stopwatch->last_us - htim6.Instance->CNT);
+  if (stopwatch->enable) {
+    stopwatch->enable = DISABLE;
+    stopwatch->dms    = 0;
+    return 1e-2 * stopwatch->dms + 1e-6 * (stopwatch->last_us - htim6.Instance->CNT);
+  } else {
+    return 0;
+  }
 }
 
 /**

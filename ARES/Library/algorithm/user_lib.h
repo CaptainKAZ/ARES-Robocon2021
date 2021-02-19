@@ -45,10 +45,7 @@ extern fp32 loop_fp32_constrain(fp32 Input, fp32 minValue, fp32 maxValue);
 //角度 °限幅 180 ~ -180
 extern fp32 theta_format(fp32 Ang);
 //计算绝对值
-extern inline int8_t  int8abs(int8_t value);
-extern inline int16_t int16abs(int16_t value);
-extern inline int32_t int32abs(int32_t value);
-extern inline fp32    fp32abs(fp32 value);
+#define ABS(x) ((x) > 0 ? (x) : -(x))
 //计算两点之间的距离
 extern fp32 distance_2d(fp32 x1, fp32 y1, fp32 x2, fp32 y2);
 
@@ -60,4 +57,7 @@ extern fp32 atan2_fast(fp32 x, fp32 y);
 #define rad_format(Ang) loop_fp32_constrain((Ang), -PI, PI)
 //判断是否在中断状态下
 extern inline int is_in_isr(void);
+//通过移位判断一个值的符号 正数是1 负数是-1
+#define SIGN(x) (((signed char *)&x)[sizeof(x) - 1] >> 7 | 1)
+#define SIGNBIT(x) (((signed char *)&x)[sizeof(x) - 1] >> 7)
 #endif

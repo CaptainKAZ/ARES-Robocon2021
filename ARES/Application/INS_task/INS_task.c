@@ -52,15 +52,15 @@ static void MotionFX_get_input(MFX_input_t *MFX_input, mpu_real_data_t *mpu6500_
   MFX_input->mag[0]  = ((ist8310_real_data->mag[0] - imu_cal.mag_cal.HI_Bias[0]) * imu_cal.mag_cal.SF_Matrix[0][0] +
                        (ist8310_real_data->mag[1] - imu_cal.mag_cal.HI_Bias[1]) * imu_cal.mag_cal.SF_Matrix[0][1] +
                        (ist8310_real_data->mag[2] - imu_cal.mag_cal.HI_Bias[2]) * imu_cal.mag_cal.SF_Matrix[0][2]) *
-                      0.02;
+                      0.02f;
   MFX_input->mag[1] = ((ist8310_real_data->mag[0] - imu_cal.mag_cal.HI_Bias[0]) * imu_cal.mag_cal.SF_Matrix[1][0] +
                        (ist8310_real_data->mag[1] - imu_cal.mag_cal.HI_Bias[1]) * imu_cal.mag_cal.SF_Matrix[1][1] +
                        (ist8310_real_data->mag[2] - imu_cal.mag_cal.HI_Bias[2]) * imu_cal.mag_cal.SF_Matrix[1][2]) *
-                      0.02;
+                      0.02f;
   MFX_input->mag[2] = ((ist8310_real_data->mag[0] - imu_cal.mag_cal.HI_Bias[0]) * imu_cal.mag_cal.SF_Matrix[2][0] +
                        (ist8310_real_data->mag[1] - imu_cal.mag_cal.HI_Bias[1]) * imu_cal.mag_cal.SF_Matrix[2][1] +
                        (ist8310_real_data->mag[2] - imu_cal.mag_cal.HI_Bias[2]) * imu_cal.mag_cal.SF_Matrix[2][2]) *
-                      0.02;
+                      0.02f;
 }
 
 static void MotionMC_get_input(MMC_Input_t *mag_cal_in, ist_real_data_t *ist8310_real_data) {
@@ -174,7 +174,7 @@ void INS_task(void *pvParameters) {
       MotionMC_GetCalParams(&imu_cal.mag_cal);
       if (imu_cal.mag_cal.CalQuality == MMC_CALQSTATUSGOOD) {
         INS_task_status.imu_calibrated = 1;
-        MotionFX_getGbias(&imu_cal.gbias);
+        MotionFX_getGbias((float *)&imu_cal.gbias);
         save_cal_data(&imu_cal);
         MotionMC_Initialize(0, 0);
       }
@@ -190,3 +190,7 @@ void INS_task(void *pvParameters) {
 char MotionFX_LoadMagCalFromNVM(unsigned short int dataSize, unsigned int *data) { return 1; }
 
 char MotionFX_SaveMagCalInNVM(unsigned short int dataSize, unsigned int *data) { return 1; }
+
+char MotionMC_LoadCalFromNVM(unsigned short int dataSize, unsigned int *data) { return 1; }
+
+char MotionMC_SaveCalInNVM(unsigned short int dataSize, unsigned int *data) { return 1; }
