@@ -45,4 +45,4 @@ void controllerSetParam(Controller *self, ControllerParam *param) { setParamTabl
   * @param    out       当输出大小不为1的时候需要传入输出指针
   * @return   fp32      输出大小为1时控制器计算返回值即为输出大小,否则为0
   */
-fp32 contollerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) { updateTable[self->type](self, set, ref, out); }
+fp32 controllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) { updateTable[self->type](self, set, ref, out); }

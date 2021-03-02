@@ -32,12 +32,13 @@ typedef struct {
 } ControllerParam;
 
 typedef struct {
-  fp32 *O_constraint; //输出限制(0即为不限制)
-  fp32 *I_loop_Llim;  //循环输入的下限(上下限设置为0即为不限制)
-  fp32 *I_loop_Hlim;  //循环输入的上限(上下限设置为0即为不限制)
+  fp32 *O_Hlim;      //输出限制(0即为不限制)
+  fp32 *O_Llim;      //输出限制(0即为不限制)
+  fp32 *I_loop_Llim; //循环输入的下限(上下限设置为0即为不限制)
+  fp32 *I_loop_Hlim; //循环输入的上限(上下限设置为0即为不限制)
 } ControllerConstrain;
 
-typedef struct {
+typedef struct Controller{
   ControllerType       type;
   uint8_t              I_size;    //输入的数据大小
   uint8_t              O_size;    //输出的数据大小
@@ -45,16 +46,16 @@ typedef struct {
   ControllerParam *    param;     //控制器参数
 } Controller;
 
-#define CLAMP(input, max)                                                                                                     \
+#define CLAMP(input, min, max)                                                                                                \
   {                                                                                                                           \
-    if (input > max) {                                                                                                        \
-      input = max;                                                                                                            \
-    } else if (input < -max) {                                                                                                \
-      input = -max;                                                                                                           \
+    if ((input) > (max)) {                                                                                                        \
+      (input) = (max);                                                                                                            \
+    } else if ((input) < (min)) {                                                                                                 \
+      (input) = (min);                                                                                                            \
     }                                                                                                                         \
   }
 
 extern void controllerSetParam(Controller *self, ControllerParam *param);
-extern fp32 contollerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out);
+extern fp32 controllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out);
 
 #endif

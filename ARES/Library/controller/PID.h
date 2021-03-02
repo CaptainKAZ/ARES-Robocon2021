@@ -34,12 +34,12 @@ typedef struct {
   fp32               kB;       //反馈抗饱和系数
   fp32               max_Iout; //积分器钳位
   PID_IntegratorType Int_type; //积分器形式
-  fp32               N;        //一阶滤波常数
+  fp32               N;        //一阶滤波常数，即为截止频率
 } PID_ControllerParam;
 
 typedef struct {
   Controller  general; //继承控制器父类
-  fp32        timeout; //积分器超时
+  fp32        timeout; //积分器超时 单位为秒
   stopwatch_t stopwatch;
   fp32        dt;
   fp32        Pout;

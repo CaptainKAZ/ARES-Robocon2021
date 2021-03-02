@@ -69,6 +69,12 @@ typedef signed long long   int64_t;
 #ifndef FAIL
 #define FAIL 0
 #endif
+#ifndef DEG2RAD(x)
+#define DEG2RAD(x) x*0.01745329251994329576923690768489f
+#endif
+#ifndef RAD2DEG(x)
+#define RAD2DEG(x) x * 57.295779513082320876798154814105f
+#endif
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

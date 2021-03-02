@@ -32,7 +32,11 @@
       "usart.h": "c",
       "imu_comm.h": "c",
       "stopwatch.h": "c",
-      "fsf.h": "c"
+      "fsf.h": "c",
+      "can_comm.h": "c",
+      "semphr.h": "c",
+      "cmsis_os.h": "c",
+      "sbus.h": "c"
     },
 	},
 	"extensions": {

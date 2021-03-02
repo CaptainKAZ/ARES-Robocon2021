@@ -55,7 +55,7 @@ fp32 FSF_ControllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) {
   }
 
   for (uint8_t i = 0; i < self->O_size;i++){
-    CLAMP(out[i], self->constrain->O_constraint[i]);
+    CLAMP(out[i],self->constrain->O_Llim[i], self->constrain->O_Hlim[i]);
   }
   
   if(self->O_size==1){

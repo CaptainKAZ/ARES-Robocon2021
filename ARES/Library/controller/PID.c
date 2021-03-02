@@ -22,7 +22,7 @@
 #define PIDPARAM ((PID_ControllerParam *)(((Controller *)self)->param))
 
 #define PID_NEEDINT(self)                                                                                                     \
-  ((PIDPARAM->Int_type == CLAMPING_INT) ? ((ABS(PID->out[1]) <= PID->general.constrain->O_constraint[0]) ||                   \
+  ((PIDPARAM->Int_type == CLAMPING_INT) ? ((ABS(PID->out[1]) <= PID->general.constrain->O_Hlim[0]) ||                   \
                                            (SIGN(PID->out[1]) ^ (SIGN(PIDPARAM->kI) ^ SIGN(PID->err[0]))))                    \
                                         : 1)
 
@@ -76,7 +76,7 @@ fp32 PID_ControllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) {
     PID->Pout = PIDPARAM->kP * PID->err[0];
     if (PID_NEEDINT(self)) {
       PID->Iout += PIDPARAM->kI * 0.5 * (PID->Ierr[0] + PID->Ierr[1]) * PID->dt;
-      CLAMP(PID->Iout, PIDPARAM->max_Iout);
+      CLAMP(PID->Iout, -PIDPARAM->max_Iout, PIDPARAM->max_Iout);
     }
     if (PIDPARAM->N != 0) {
       PID->Dout[1] = PID->Dout[0];
@@ -87,12 +87,12 @@ fp32 PID_ControllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) {
     }
     PID->out[0] = PID->out[1] = PID->Pout + PID->Iout + PID->Dout[0];
 
-    CLAMP(PID->out[0], self->constrain->O_constraint[0]);
+    CLAMP(PID->out[0],self->constrain->O_Llim[0], self->constrain->O_Hlim[0]);
     return PID->out[0];
   case PIDINC_CONTROLLER:
     PID->Pout = PIDPARAM->kP * (PID->err[0] - PID->err[1]);
     PID->Iout = PIDPARAM->kI * (PID->err[0]);
-    CLAMP(PID->Iout, PIDPARAM->max_Iout);
+    CLAMP(PID->Iout, -PIDPARAM->max_Iout,PIDPARAM->max_Iout);
     if (PIDPARAM->N == 0) {
       PID->Dout[0] = PIDPARAM->kD * (PID->err[0] - 2 * PID->err[1] + PID->err[2]);
     } else {
@@ -103,7 +103,7 @@ fp32 PID_ControllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) {
     PID->out[0] += PID->dt * 0.5 * (PID->out[1] + PID->Pout + PID->Iout + PID->Dout[0]);
     PID->out[1] = PID->Pout + PID->Iout + PID->Dout[0];
 
-    CLAMP(PID->out[0], self->constrain->O_constraint[0]);
+    CLAMP(PID->out[0], self->constrain->O_Llim[0], self->constrain->O_Hlim[0]);
     return PID->out[0];
   }
 }

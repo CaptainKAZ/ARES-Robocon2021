@@ -25,6 +25,7 @@
 #define MOTIONFX_INIT_TIME 5
 #define MFX_DATA_ADDRESS 0x80E0000
 #define IMU_CAL_HEAD ARES_HEX
+#define IMU_TEMPERATRUE 55
 
 typedef struct{
   uint32_t      head;
