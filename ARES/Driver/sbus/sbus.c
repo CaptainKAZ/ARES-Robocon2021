@@ -16,7 +16,7 @@ void sbus_init(void) {
     __HAL_DMA_DISABLE(&hdma_usart1_rx);
   }
   //将DMA的外设地址设置为USART1的DR寄存器
-  hdma_usart1_rx.Instance->PAR = (uint32_t) & (huart1.Instance->DR);
+  hdma_usart1_rx.Instance->PAR = (uint32_t) & (USART1->DR);
   //将DMA的缓冲区1地址设置为第一个BUFFER
   hdma_usart1_rx.Instance->M0AR = (uint32_t)(&SBUS_rx_buf[0]);
   //将DMA的缓冲区2地址设置为第二个BUFFER
@@ -49,7 +49,7 @@ static void parse_sbus(volatile const uint8_t *sbus_buf) {
   * 
   */
 void sbus_hook(void) {
-  static uint16_t this_time_rx_len = 0;
+  uint16_t this_time_rx_len = 0;
 
   __HAL_UART_CLEAR_PEFLAG(&huart1);
   __HAL_DMA_DISABLE(&hdma_usart1_rx);

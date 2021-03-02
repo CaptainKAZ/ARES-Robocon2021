@@ -34,9 +34,9 @@ void TIM6_DAC_IRQHandler(void) { stopwatch_hook(); }
   * 
   */
 void USART1_IRQHandler(void) {
-  if (huart1.Instance->SR & UART_FLAG_IDLE) {
+  
     sbus_hook();
-  }
+  
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {

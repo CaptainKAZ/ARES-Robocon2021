@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F427xx, ARM_MATH_CM4</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\DSP\Include;..\Drivers\CMSIS\DSP\Include;../Middlewares/ST/STM32_MotionFX_Library/Inc;..\ARES\Library\pid;..\ARES\Library\algorithm;..\ARES\Driver\imu;..\ARES\Driver\sbus;..\ARES\Application\can_communication;..\ARES\Application\state_steaming;../Middlewares/ST/STM32_MotionMC_Library/Inc;..\ARES\Application\INS_task;..\ARES\Library\stopwatch</IncludePath>
+              <IncludePath>../Core/Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;  ../Middlewares/Third_Party/FreeRTOS/Source/include;  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;  ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;  ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;  ../Drivers/CMSIS/Include;  ..\DSP\Include;  ..\Drivers\CMSIS\DSP\Include;  ../Middlewares/ST/STM32_MotionFX_Library/Inc;  ..\ARES\Library\pid;  ..\ARES\Library\algorithm;  ..\ARES\Driver\imu;  ..\ARES\Driver\sbus;  ..\ARES\Application\can_communication;  ..\ARES\Application\state_steaming;  ../Middlewares/ST/STM32_MotionMC_Library/Inc;  ..\ARES\Application\INS_task;  ..\ARES\Library\stopwatch;  ..\ARES\Driver\ops</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -392,6 +392,11 @@
         <Group>
           <GroupName>Application/User/Core</GroupName>
           <Files>
+            <File>
+              <FileName>OPS-9_receive.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\ops\OPS-9_receive.c</FilePath>
+            </File>
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
@@ -656,6 +661,11 @@
               <FileName>imu_comm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ARES\Driver\imu\imu_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\user_it.c</FilePath>
             </File>
           </Files>
         </Group>
