@@ -11,8 +11,6 @@
                 "${workspaceFolder}\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\RVDS\\ARM_CM4F",
                 "${workspaceFolder}\\Drivers\\CMSIS\\Device\\ST\\STM32F4xx\\Include",
                 "${workspaceFolder}\\Drivers\\CMSIS\\Include",
-                "${workspaceFolder}\\ARES-App\\pid",
-                "${workspaceFolder}\\ARES-App\\can_communication",
                 "C:\\Keil_v5\\ARM\\ARMCC\\include",
                 "C:\\Keil_v5\\ARM\\ARMCC\\include\\rw",
                 "${workspaceFolder}\\MDK-ARM",
@@ -21,7 +19,7 @@
                 "${workspaceFolder}\\Middlewares\\Third_Party\\FreeRTOS\\Source",
                 "${workspaceFolder}\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\MemMang",
                 "${workspaceFolder}\\Middlewares\\ST\\STM32_MotionFX_Library\\Inc",
-                "${workspaceFolder}\\ARES-App\\motionfx",
+                "${workspaceFolder}\\ARES\\**",
                 "${workspaceFolder}\\**"
             ],
             "defines": [

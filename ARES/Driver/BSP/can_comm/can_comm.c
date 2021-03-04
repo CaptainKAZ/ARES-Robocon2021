@@ -17,12 +17,16 @@
   */
 #include "can_comm.h"
 
+extern void RM_Motor_RxHook(CAN_Frame* frame);
+extern void RMD_Motor_RxHook(CAN_Frame* frame);
+extern void VESC_Motor_RxHook(CAN_Frame* frame);
+
 void CAN_RxHook(CAN_Frame* frame) {
   if(frame->type==CAN_FRAME_STD){
     switch(frame->id){
-    case ENCODER_RX: Encoder_RxHook(frame); break;
-    case RM_RX_L ... RM_RX_H: RM_Motor_RxHook(frame); break;
-    case RMD_RX_L ... RMD_RX_H: RMD_RxHook(frame); break;
+    case ENCODER_RX: break; //Encoder_RxHook(frame); break;
+    case RM_MOTOR_RX_L ... RM_MOTOR_RX_H: RM_Motor_RxHook(frame); break;
+    case RMD_MOTOR_RX_L ... RMD_MOTOR_RX_H: RMD_Motor_RxHook(frame); break;
     default: break;
     }
   }else if(frame->type==CAN_FRAME_EXT){

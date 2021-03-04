@@ -1,0 +1,34 @@
+#n
+#t/* USER CODE BEGIN RTOS_MUTEX */
+#t/* add mutexes, ... */
+#t/* USER CODE END RTOS_MUTEX */
+#n
+#t/* USER CODE BEGIN RTOS_SEMAPHORES */
+#t/* add semaphores, ... */
+#t/* USER CODE END RTOS_SEMAPHORES */
+#n
+#t/* USER CODE BEGIN RTOS_TIMERS */
+#t/* start timers, add new ones, ... */
+#t/* USER CODE END RTOS_TIMERS */
+#n
+#t/* USER CODE BEGIN RTOS_QUEUES */
+#t/* add queues, ... */
+#t/* USER CODE END RTOS_QUEUES */
+#n#t/* Create the thread(s) */
+#t/* creation of MotorTask */
+#tMotorTaskHandle = osThreadNew(motor_task, NULL, &MotorTask_attributes);
+#n
+#t/* creation of QuickTestTask */
+#tQuickTestTaskHandle = osThreadNew(quick_test_task, NULL, &QuickTestTask_attributes);
+#n
+#t/* creation of INSTask */
+#tINSTaskHandle = osThreadNew(INS_task, NULL, &INSTask_attributes);
+#n
+#t/* creation of StateSteaming */
+#tStateSteamingHandle = osThreadNew(state_steaming_task, NULL, &StateSteaming_attributes);
+#n
+#n
+#t/* USER CODE BEGIN RTOS_THREADS */
+#t/* add threads, ... */
+#t/* USER CODE END RTOS_THREADS */
+#n

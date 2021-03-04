@@ -51,7 +51,12 @@ extern fp32 distance_2d(fp32 x1, fp32 y1, fp32 x2, fp32 y2);
 
 extern fp32 atan2_fast(fp32 x, fp32 y);
 
-#define RAD2DEG(x) (fp32)(x)*(57.295779513082320876798154814105f)
+#ifndef DEG2RAD
+#define DEG2RAD(x) ((x)*0.01745329251994329576923690768489f)
+#endif
+#ifndef RAD2DEG
+#define RAD2DEG(x) ((x) * 57.295779513082320876798154814105f)
+#endif
 
 //弧度格式化为-PI~PI
 #define rad_format(Ang) loop_fp32_constrain((Ang), -PI, PI)

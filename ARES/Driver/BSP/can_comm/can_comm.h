@@ -39,12 +39,12 @@ typedef struct {
 } CAN_Frame;
 
 #define ENCODER_RX 0x01
-#define RM_RX_L 0x201
-#define RM_RX_H 0x208
-#define RMD_RX_L 0x141
-#define RMD_RX_H 0x148
+#define RM_MOTOR_RX_L 0x201
+#define RM_MOTOR_RX_H 0x208
+#define RMD_MOTOR_RX_L 0x141
+#define RMD_MOTOR_RX_H 0x148
 
 extern void CAN_RxHook(CAN_Frame *frame);
 extern void CAN_Tx(CAN_Frame *frame);
-
+extern void CAN_Start(CAN_HandleTypeDef *hcan);
 #endif

@@ -52,9 +52,10 @@ static fp32                temperature_I_loop_Llim = 0;
 static fp32                temperature_I_loop_Hlim = 0;
 static ControllerConstrain temperature_constrain   = {.I_loop_Hlim = &temperature_I_loop_Hlim,
                                                     .I_loop_Llim = &temperature_I_loop_Llim,
-                                                    .O_Hlim      = &temperature_O_Llim,
+                                                    .O_Hlim      = &temperature_O_Hlim,
                                                     .O_Llim      = &temperature_O_Llim};
-
+static fp32 imu_ctrl_tempretrue=IMU_TEMPERATRUE;
+                                                    
 static void MotionFX_get_input(MFX_input_t *MFX_input, mpu_real_data_t *mpu6500_real_data,
                                ist_real_data_t *ist8310_real_data) {
   MFX_input->acc[0]  = mpu6500_real_data->accel[0];
@@ -183,7 +184,7 @@ void INS_task(void *pvParameters) {
       imu_get_data(&mpu6500_real_data, &ist8310_real_data);
       if (xTaskGetTickCount()-last_wake_time>=5) {
         __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2,
-                              controllerUpdate(&temperature_pid, IMU_TEMPERATRUE, &mpu6500_real_data.temp, NULL));
+                              controllerUpdate((Controller *)&temperature_pid, &imu_ctrl_tempretrue, &mpu6500_real_data.temp, NULL));
       }
     } else {
       vTaskDelayUntil(&last_wake_time, 10);
@@ -198,7 +199,7 @@ void INS_task(void *pvParameters) {
         MotionMC_Initialize(0, 0);
       }
       __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2,
-                            controllerUpdate(&temperature_pid, IMU_TEMPERATRUE, &mpu6500_real_data.temp, NULL));
+                            controllerUpdate((Controller *)&temperature_pid, &imu_ctrl_tempretrue, &mpu6500_real_data.temp, NULL));
     }
     last_wake_time = xTaskGetTickCount();
     MotionFX_get_input(&motionFX_input, &mpu6500_real_data, &ist8310_real_data);

@@ -20,7 +20,7 @@
 #include "main.h"
 
 typedef enum {
-  NONE = 0,          //未初始化
+  NONE_CONTROLLER = 0,          //未初始化
   FSF_CONTROLLER,    //全状态反馈控制
   PIDPOS_CONTROLLER, //位置式PID控制
   PIDINC_CONTROLLER, //增量式PID控制

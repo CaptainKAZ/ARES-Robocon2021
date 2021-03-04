@@ -325,7 +325,7 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
-            <uGnu>0</uGnu>
+            <uGnu>1</uGnu>
             <useXO>0</useXO>
             <v6Lang>1</v6Lang>
             <v6LangP>1</v6LangP>
@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F427xx, ARM_MATH_CM4</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\DSP\Include;..\Drivers\CMSIS\DSP\Include;../Middlewares/ST/STM32_MotionFX_Library/Inc;..\ARES\Library\pid;..\ARES\Library\algorithm;..\ARES\Driver\imu;..\ARES\Driver\sbus;..\ARES\Application\can_communication;..\ARES\Application\state_steaming;../Middlewares/ST/STM32_MotionMC_Library/Inc;..\ARES\Application\INS_task;..\ARES\Library\stopwatch</IncludePath>
+              <IncludePath>../Core/Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;  ../Middlewares/Third_Party/FreeRTOS/Source/include;  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;  ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;  ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;  ../Drivers/CMSIS/Include;  ..\DSP\Include;  ..\Drivers\CMSIS\DSP\Include;  ../Middlewares/ST/STM32_MotionFX_Library/Inc;  ../Middlewares/ST/STM32_MotionMC_Library/Inc;  ..\ARES\Application\INS_task;  ..\ARES\Application\motor_task;  ..\ARES\Application\state_steaming;  ..\ARES\Driver\BSP\can_comm;  ..\ARES\Driver\BSP\imu;  ..\ARES\Driver\Device\motor;  ..\ARES\Driver\Device\sbus;  ..\ARES\Library\algorithm;  ..\ARES\Library\controller;  ..\ARES\Library\stopwatch</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -640,33 +640,18 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>ARES/Driver</GroupName>
+          <GroupName>Middlewares/STM32_MotionMC_Library/Sensors/STM32_MotionMC_Library/Core</GroupName>
           <Files>
             <File>
-              <FileName>sbus.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ARES\Driver\sbus\sbus.c</FilePath>
-            </File>
-            <File>
-              <FileName>imu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ARES\Driver\imu\imu.c</FilePath>
-            </File>
-            <File>
-              <FileName>imu_comm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ARES\Driver\imu\imu_comm.c</FilePath>
+              <FileName>MotionMC_CM4F_wc16_ot.a</FileName>
+              <FileType>4</FileType>
+              <FilePath>../Middlewares/ST/STM32_MotionMC_Library/Lib/MotionMC_CM4F_wc16_ot.a</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>ARES/Application</GroupName>
           <Files>
-            <File>
-              <FileName>can_communication.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ARES\Application\can_communication\can_communication.c</FilePath>
-            </File>
             <File>
               <FileName>state_steaming.c</FileName>
               <FileType>1</FileType>
@@ -677,16 +662,16 @@
               <FileType>1</FileType>
               <FilePath>..\ARES\Application\INS_task\INS_task.c</FilePath>
             </File>
+            <File>
+              <FileName>motor_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Application\motor_task\motor_task.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>ARES/Library</GroupName>
           <Files>
-            <File>
-              <FileName>pid.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ARES\Library\pid\pid.c</FilePath>
-            </File>
             <File>
               <FileName>user_lib.c</FileName>
               <FileType>1</FileType>
@@ -697,15 +682,75 @@
               <FileType>1</FileType>
               <FilePath>..\ARES\Library\stopwatch\stopwatch.c</FilePath>
             </File>
+            <File>
+              <FileName>PID.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Library\controller\PID.c</FilePath>
+            </File>
+            <File>
+              <FileName>FSF.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Library\controller\FSF.c</FilePath>
+            </File>
+            <File>
+              <FileName>controller.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Library\controller\controller.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>Middlewares/STM32_MotionMC_Library/Sensors/STM32_MotionMC_Library/Core</GroupName>
+          <GroupName>ARES/Driver/Device</GroupName>
           <Files>
             <File>
-              <FileName>MotionMC_CM4F_wc16_ot.a</FileName>
-              <FileType>4</FileType>
-              <FilePath>../Middlewares/ST/STM32_MotionMC_Library/Lib/MotionMC_CM4F_wc16_ot.a</FilePath>
+              <FileName>motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\Device\motor\motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>RM_motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\Device\motor\RM_motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>RMD_motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\Device\motor\RMD_motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>VESC_motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\Device\motor\VESC_motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>sbus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\Device\sbus\sbus.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ARES/Driver/BSP</GroupName>
+          <Files>
+            <File>
+              <FileName>user_it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\BSP\user_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>can_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\BSP\can_comm\can_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>imu_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\BSP\imu\imu_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>imu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\BSP\imu\imu.c</FilePath>
             </File>
           </Files>
         </Group>

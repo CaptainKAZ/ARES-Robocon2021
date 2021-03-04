@@ -19,12 +19,13 @@
 #define MOTOR_H
 #include "main.h"
 #include "can_comm.h"
+#include "PID.h"
 
 //电机控制的间隔，单位为ms
 #define MOTOR_CTRL_TIME 1
 
 typedef enum {
-  NONE = 0,
+  NONE_MOTOR = 0,
   RM_MOTOR,
   VESC_MOTOR,
   RMD_MOTOR,
@@ -46,14 +47,14 @@ typedef enum {
 typedef struct {
   MotorInstructType type;
   fp32              set;
-  uint32_t          timeout; //控制超时，单位为ms
+  int32_t          timeout; //控制超时，单位为ms
 } MotorInstruct;
 
 typedef struct {
-  fp32     current;
-  fp32     speed;
-  fp32     angle;
-  fp32     temperature;
+  fp32 current;
+  fp32 speed;
+  fp32 angle;
+  fp32 temperature;
 } MotorStatus;
 
 typedef struct Motor {
@@ -61,5 +62,16 @@ typedef struct Motor {
   MotorStatus   status;
   MotorInstruct instruct;
 } Motor;
+
+extern void Motor_SetSpeedPID(Motor *self, PID_ControllerParam *param);
+extern void Motor_SetAnglePID(Motor *self, PID_ControllerParam *param);
+extern void Motor_Zero(Motor *self);
+extern void Motor_SetCurrent(Motor *self, fp32 mA, uint32_t timeout);
+extern void Motor_SetSpeed(Motor *self, fp32 rpm, uint32_t timeout);
+extern void Motor_SetAngle(Motor *self, fp32 rad, uint32_t timeout);
+extern void Motor_SetAltController(Motor *self, Controller *alt_controller,
+                            fp32 (*alt_controller_update)(Motor *motor, Controller *controller));
+extern void Motor_AltControl(Motor *self, MotorInstructType type, uint32_t timeout);
+Motor *CAN_Find_Motor(MotorType type, CAN_Device device, uint8_t id);
 
 #endif

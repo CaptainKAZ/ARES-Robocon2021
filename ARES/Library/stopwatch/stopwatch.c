@@ -19,7 +19,7 @@
 #include "stopwatch.h"
 #include "tim.h"
 static stopwatch_t head;
-stopwatch_t *      ptr;
+static stopwatch_t *      ptr;
 
 /**
   * @brief    注册计时器
@@ -56,8 +56,10 @@ void tic(stopwatch_t *stopwatch) {
   * @return   fp32      计时器时间，单位为秒
   */
 fp32 toc(stopwatch_t *stopwatch) {
-  if (stopwatch->enable)
-    return 1e-2 * stopwatch->dms + 1e-6 * (stopwatch->last_us - htim6.Instance->CNT);
+  if (stopwatch->enable){
+    int32_t this_us = htim6.Instance->CNT;
+    fp32 ret=1e-2 *stopwatch-> dms + 1.0e-6f * (this_us- stopwatch->last_us);
+    return ret;}
   else
     return 0;
 }
@@ -71,8 +73,10 @@ fp32 toc(stopwatch_t *stopwatch) {
 fp32 stopwatch_disable(stopwatch_t *stopwatch) {
   if (stopwatch->enable) {
     stopwatch->enable = DISABLE;
+    int32_t this_us = htim6.Instance->CNT;
+    fp32 ret=1e-2 *stopwatch-> dms + 1.0e-6f * (this_us- stopwatch->last_us);
     stopwatch->dms    = 0;
-    return 1e-2 * stopwatch->dms + 1e-6 * (stopwatch->last_us - htim6.Instance->CNT);
+    return ret;
   } else {
     return 0;
   }
@@ -83,12 +87,12 @@ fp32 stopwatch_disable(stopwatch_t *stopwatch) {
   * 
   */
 void stopwatch_hook(void) {
-  ptr = &head;
+    stopwatch_t *      hookptr = &head;//不使用静态变量保证可重入性
   //遍历每一个链表
-  while (head.next_stopwatch != NULL) {
-    if (ptr->enable) {
-      ++ptr->dms;
+  while (hookptr->next_stopwatch != NULL) {
+    if (hookptr->enable) {
+      ++hookptr->dms;
     }
-    ptr = ptr->next_stopwatch;
+    hookptr = hookptr->next_stopwatch;
   }
 }

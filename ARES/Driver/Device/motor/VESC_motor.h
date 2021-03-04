@@ -28,6 +28,7 @@ typedef struct {
   fp32           zero;
   uint32_t       cumulative_turn;
   Controller *   alt_controller;
+  MotorInstructType alt_ctrl_type;
   fp32 (*alt_controller_update)(Motor *motor, Controller *controller);
 } VESC_Motor;
 

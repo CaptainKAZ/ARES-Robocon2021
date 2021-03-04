@@ -23,12 +23,21 @@
 #include "imu_comm.h"
 #include "INS_task.h"
 #include "can_comm.h"
+#include "tim.h"
 
 /**
   * @brief    TIM6中断服务程序，负责计时器更新
   * 
   */
-void TIM6_DAC_IRQHandler(void) { stopwatch_hook(); }
+void TIM6_DAC_IRQHandler(void) { if (__HAL_TIM_GET_FLAG(&htim6, TIM_FLAG_UPDATE) != RESET)
+  {
+    if (__HAL_TIM_GET_IT_SOURCE(&htim6, TIM_IT_UPDATE) != RESET)
+    {
+      __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
+        stopwatch_hook();
+
+    }
+  } }
 
 /**
   * @brief    USART1中断服务程序，负责SBUS更新

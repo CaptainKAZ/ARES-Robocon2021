@@ -75,13 +75,13 @@ fp32 PID_ControllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) {
   case PIDPOS_CONTROLLER:
     PID->Pout = PIDPARAM->kP * PID->err[0];
     if (PID_NEEDINT(self)) {
-      PID->Iout += PIDPARAM->kI * 0.5 * (PID->Ierr[0] + PID->Ierr[1]) * PID->dt;
+      PID->Iout += PIDPARAM->kI * 0.5f * (PID->Ierr[0] + PID->Ierr[1]) * PID->dt;
       CLAMP(PID->Iout, -PIDPARAM->max_Iout, PIDPARAM->max_Iout);
     }
     if (PIDPARAM->N != 0) {
       PID->Dout[1] = PID->Dout[0];
       PID->Dout[0] = PIDPARAM->kD * (PIDPARAM->N * (PID->err[0] - PID->DInt));
-      PID->DInt += 0.5 * PID->dt * (PID->Dout[0] + PID->Dout[1]);
+      PID->DInt += 0.5f * PID->dt * (PID->Dout[0] + PID->Dout[1]);
     } else {
       PID->Dout[0] = PIDPARAM->kD * (PID->err[0] - PID->err[1]) / PID->dt;
     }
@@ -98,22 +98,23 @@ fp32 PID_ControllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) {
     } else {
       PID->Dout[1] = PID->Dout[0];
       PID->Dout[0] = PIDPARAM->kD * (PIDPARAM->N * (PID->err[0] - PID->err[1] - PID->DInt));
-      PID->DInt += 0.5 * PID->dt * (PID->Dout[0] + PID->Dout[1]);
+      PID->DInt += 0.5f * PID->dt * (PID->Dout[0] + PID->Dout[1]);
     }
-    PID->out[0] += PID->dt * 0.5 * (PID->out[1] + PID->Pout + PID->Iout + PID->Dout[0]);
+    PID->out[0] += PID->dt * 0.5f * (PID->out[1] + PID->Pout + PID->Iout + PID->Dout[0]);
     PID->out[1] = PID->Pout + PID->Iout + PID->Dout[0];
 
     CLAMP(PID->out[0], self->constrain->O_Llim[0], self->constrain->O_Hlim[0]);
     return PID->out[0];
+  default :return 0;
   }
 }
 
 void PID_ControllerSetParam(Controller *self, ControllerParam *param) {
-  if (NULL == self || param == self) {
+  if (NULL == self || param == NULL) {
     return;
   }
   if (param->type == PIDPOS_CONTROLLER || param->type == PIDINC_CONTROLLER) {
-    PID_Clear(self);
+    PID_Clear(PID);
     self->type  = param->type;
     self->param = param;
   }
@@ -128,7 +129,7 @@ void PID_ControllerInit(PID_Controller *self, ControllerConstrain *constrain, PI
   }
   self->general.type      = param->general.type;
   self->general.constrain = constrain;
-  self->general.param     = param;
+  self->general.param     = (ControllerParam *)param;
   self->general.I_size = self->general.O_size = 1;
   self->timeout                               = timeout;
   stopwatch_register(&self->stopwatch);

@@ -48,10 +48,10 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for CanCommTask */
-osThreadId_t CanCommTaskHandle;
-const osThreadAttr_t CanCommTask_attributes = {
-  .name = "CanCommTask",
+/* Definitions for MotorTask */
+osThreadId_t MotorTaskHandle;
+const osThreadAttr_t MotorTask_attributes = {
+  .name = "MotorTask",
   .priority = (osPriority_t) osPriorityRealtime,
   .stack_size = 256 * 4
 };
@@ -82,7 +82,7 @@ const osThreadAttr_t StateSteaming_attributes = {
 
 /* USER CODE END FunctionPrototypes */
 
-void can_communication_task(void *argument);
+void motor_task(void *argument);
 void quick_test_task(void *argument);
 void INS_task(void *argument);
 void state_steaming_task(void *argument);
@@ -116,8 +116,8 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of CanCommTask */
-  CanCommTaskHandle = osThreadNew(can_communication_task, NULL, &CanCommTask_attributes);
+  /* creation of MotorTask */
+  MotorTaskHandle = osThreadNew(motor_task, NULL, &MotorTask_attributes);
 
   /* creation of QuickTestTask */
   QuickTestTaskHandle = osThreadNew(quick_test_task, NULL, &QuickTestTask_attributes);
@@ -134,22 +134,22 @@ void MX_FREERTOS_Init(void) {
 
 }
 
-/* USER CODE BEGIN Header_can_communication_task */
+/* USER CODE BEGIN Header_motor_task */
 /**
-  * @brief  Function implementing the CANComm thread.
+  * @brief  Function implementing the MotorTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_can_communication_task */
-__weak void can_communication_task(void *argument)
+/* USER CODE END Header_motor_task */
+__weak void motor_task(void *argument)
 {
-  /* USER CODE BEGIN can_communication_task */
+  /* USER CODE BEGIN motor_task */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END can_communication_task */
+  /* USER CODE END motor_task */
 }
 
 /* USER CODE BEGIN Header_quick_test_task */

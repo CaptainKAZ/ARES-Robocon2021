@@ -16,7 +16,7 @@
   * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
   */
 #ifndef PID_H
-#define PID
+#define PID_H
 #include "controller.h"
 #include "stopwatch.h"
 
