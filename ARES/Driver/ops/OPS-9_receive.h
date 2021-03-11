@@ -5,4 +5,6 @@
 #define OPS_FRAME_LENGTH 28
 #define OPS_BUFFER_LENGTH 56
 
+extern void ops_init(void);
+
 #endif

@@ -5,10 +5,7 @@ fp32           SBUS_CHANNEL[10];
 static uint8_t SBUS_rx_buf[2][SBUS_RX_BUF_NUM];
 
 void sbus_init(void) {
-  //使能DMA串口接收
-  SET_BIT(huart1.Instance->CR3, USART_CR3_DMAR);
-  //使能串口空闲中断
-  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+ 
   //停止DMA接收
   __HAL_DMA_DISABLE(&hdma_usart1_rx);
   //由于DMA是AHB总线主设备,和CPU有冲突，所以有可能一次指令不成功
@@ -27,6 +24,11 @@ void sbus_init(void) {
   SET_BIT(hdma_usart1_rx.Instance->CR, DMA_SxCR_DBM);
   //使能DMA
   __HAL_DMA_ENABLE(&hdma_usart1_rx);
+  
+   //使能DMA串口接收
+  SET_BIT(huart1.Instance->CR3, USART_CR3_DMAR);
+  //使能串口空闲中断
+  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
 }
 
 static void parse_sbus(volatile const uint8_t *sbus_buf) {
