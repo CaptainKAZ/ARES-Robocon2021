@@ -3,8 +3,8 @@
 
 #include "main.h"
 
-#define SBUS_RX_BUF_NUM 50u
-#define RC_FRAME_LENGTH 25u
+#define SBUS_RXBUF_SIZE 50u
+#define SBUS_FRAME_LENGTH 25u
 
 #define SBUS_VALUE_MAX ((fp32)671)
 #define SBUS_VALUE_OFFSET ((fp32)1024)

@@ -60,20 +60,27 @@ osThreadId_t QuickTestTaskHandle;
 const osThreadAttr_t QuickTestTask_attributes = {
   .name = "QuickTestTask",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4
+  .stack_size = 512 * 4
 };
 /* Definitions for INSTask */
 osThreadId_t INSTaskHandle;
 const osThreadAttr_t INSTask_attributes = {
   .name = "INSTask",
-  .priority = (osPriority_t) osPriorityRealtime7,
+  .priority = (osPriority_t) osPriorityRealtime,
   .stack_size = 1024 * 4
 };
-/* Definitions for StateSteaming */
-osThreadId_t StateSteamingHandle;
-const osThreadAttr_t StateSteaming_attributes = {
-  .name = "StateSteaming",
+/* Definitions for FeedbackTask */
+osThreadId_t FeedbackTaskHandle;
+const osThreadAttr_t FeedbackTask_attributes = {
+  .name = "FeedbackTask",
   .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for LEDMonitorTask */
+osThreadId_t LEDMonitorTaskHandle;
+const osThreadAttr_t LEDMonitorTask_attributes = {
+  .name = "LEDMonitorTask",
+  .priority = (osPriority_t) osPriorityLow,
   .stack_size = 128 * 4
 };
 
@@ -85,9 +92,40 @@ const osThreadAttr_t StateSteaming_attributes = {
 void motor_task(void *argument);
 void quick_test_task(void *argument);
 void INS_task(void *argument);
-void state_steaming_task(void *argument);
+void feedback_task(void *argument);
+void led_monitor_task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+
+/* Hook prototypes */
+void vApplicationIdleHook(void);
+void vApplicationTickHook(void);
+
+/* USER CODE BEGIN 2 */
+__weak void vApplicationIdleHook( void )
+{
+   /* vApplicationIdleHook() will only be called if configUSE_IDLE_HOOK is set
+   to 1 in FreeRTOSConfig.h. It will be called on each iteration of the idle
+   task. It is essential that code added to this hook function never attempts
+   to block in any way (for example, call xQueueReceive() with a block time
+   specified, or call vTaskDelay()). If the application makes use of the
+   vTaskDelete() API function (as this demo application does) then it is also
+   important that vApplicationIdleHook() is permitted to return to its calling
+   function, because it is the responsibility of the idle task to clean up
+   memory allocated by the kernel to any task that has since been deleted. */
+}
+/* USER CODE END 2 */
+
+/* USER CODE BEGIN 3 */
+__weak void vApplicationTickHook( void )
+{
+   /* This function will be called by each tick interrupt if
+   configUSE_TICK_HOOK is set to 1 in FreeRTOSConfig.h. User code can be
+   added here, but the tick hook is called from an interrupt context, so
+   code must not attempt to block, and only the interrupt safe FreeRTOS API
+   functions can be used (those that end in FromISR()). */
+}
+/* USER CODE END 3 */
 
 /**
   * @brief  FreeRTOS initialization
@@ -125,8 +163,11 @@ void MX_FREERTOS_Init(void) {
   /* creation of INSTask */
   INSTaskHandle = osThreadNew(INS_task, NULL, &INSTask_attributes);
 
-  /* creation of StateSteaming */
-  StateSteamingHandle = osThreadNew(state_steaming_task, NULL, &StateSteaming_attributes);
+  /* creation of FeedbackTask */
+  FeedbackTaskHandle = osThreadNew(feedback_task, NULL, &FeedbackTask_attributes);
+
+  /* creation of LEDMonitorTask */
+  LEDMonitorTaskHandle = osThreadNew(led_monitor_task, NULL, &LEDMonitorTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -188,22 +229,40 @@ __weak void INS_task(void *argument)
   /* USER CODE END INS_task */
 }
 
-/* USER CODE BEGIN Header_state_steaming_task */
+/* USER CODE BEGIN Header_feedback_task */
 /**
-* @brief Function implementing the StateSteaming thread.
+* @brief Function implementing the FeedbackTask thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_state_steaming_task */
-__weak void state_steaming_task(void *argument)
+/* USER CODE END Header_feedback_task */
+__weak void feedback_task(void *argument)
 {
-  /* USER CODE BEGIN state_steaming_task */
+  /* USER CODE BEGIN feedback_task */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END state_steaming_task */
+  /* USER CODE END feedback_task */
+}
+
+/* USER CODE BEGIN Header_led_monitor_task */
+/**
+* @brief Function implementing the LEDMonitorTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_led_monitor_task */
+__weak void led_monitor_task(void *argument)
+{
+  /* USER CODE BEGIN led_monitor_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END led_monitor_task */
 }
 
 /* Private application code --------------------------------------------------*/

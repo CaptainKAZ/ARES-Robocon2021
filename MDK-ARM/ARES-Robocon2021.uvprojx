@@ -134,7 +134,7 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4101</DriverSelection>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
@@ -188,7 +188,7 @@
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>1</useUlib>
+            <useUlib>0</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F427xx, ARM_MATH_CM4</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;  ../Middlewares/Third_Party/FreeRTOS/Source/include;  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;  ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;  ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;  ../Drivers/CMSIS/Include;  ..\DSP\Include;  ..\Drivers\CMSIS\DSP\Include;  ../Middlewares/ST/STM32_MotionFX_Library/Inc;  ../Middlewares/ST/STM32_MotionMC_Library/Inc;  ..\ARES\Application\INS_task;  ..\ARES\Application\motor_task;  ..\ARES\Application\state_steaming;  ..\ARES\Driver\BSP\can_comm;  ..\ARES\Driver\BSP\imu;  ..\ARES\Driver\Device\motor;  ..\ARES\Driver\Device\sbus;  ..\ARES\Library\algorithm;  ..\ARES\Library\controller;  ..\ARES\Library\stopwatch</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\DSP\Include;..\Drivers\CMSIS\DSP\Include;../Middlewares/ST/STM32_MotionFX_Library/Inc;../Middlewares/ST/STM32_MotionMC_Library/Inc;..\ARES\Application\INS_task;..\ARES\Application\motor_task;..\ARES\Application\state_steaming;..\ARES\Driver\BSP\can_comm;..\ARES\Driver\BSP\imu;..\ARES\Driver\Device\motor;..\ARES\Driver\Device\sbus;..\ARES\Library\algorithm;..\ARES\Library\controller;..\ARES\Library\stopwatch;..\ARES\Driver\Device\ops;..\ARES\Driver\BSP\flash;..\ARES\Application\user_init;..\ARES\Driver\Device\encoder;..\ARES\Application\feedback_task;..\ARES\Application\led_monitor_task;..\ARES\Library\cpu_utils;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;..\ARES\Application\quick_test_task</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -653,11 +653,6 @@
           <GroupName>ARES/Application</GroupName>
           <Files>
             <File>
-              <FileName>state_steaming.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ARES\Application\state_steaming\state_steaming.c</FilePath>
-            </File>
-            <File>
               <FileName>INS_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ARES\Application\INS_task\INS_task.c</FilePath>
@@ -666,6 +661,26 @@
               <FileName>motor_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ARES\Application\motor_task\motor_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_init.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Application\user_init\user_init.c</FilePath>
+            </File>
+            <File>
+              <FileName>feedback_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Application\feedback_task\feedback_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>led_monitor_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Application\led_monitor_task\led_monitor_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>quick_test_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Application\quick_test_task\quick_test_task.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -697,6 +712,11 @@
               <FileType>1</FileType>
               <FilePath>..\ARES\Library\controller\controller.c</FilePath>
             </File>
+            <File>
+              <FileName>cpu_utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Library\cpu_utils\cpu_utils.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -727,6 +747,16 @@
               <FileType>1</FileType>
               <FilePath>..\ARES\Driver\Device\sbus\sbus.c</FilePath>
             </File>
+            <File>
+              <FileName>ops.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\Device\ops\ops.c</FilePath>
+            </File>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\Device\encoder\encoder.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -751,6 +781,11 @@
               <FileName>imu.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ARES\Driver\BSP\imu\imu.c</FilePath>
+            </File>
+            <File>
+              <FileName>flash_io.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\BSP\flash\flash_io.c</FilePath>
             </File>
           </Files>
         </Group>

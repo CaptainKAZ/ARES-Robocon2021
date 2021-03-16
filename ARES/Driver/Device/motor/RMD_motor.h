@@ -62,10 +62,6 @@ typedef struct {
   PID_Controller speed_pid;
   PID_Controller angle_pid;
   fp32           set_current;
-  fp32           zero;
-  uint32_t       cumulative_turn;
-  Controller *   alt_controller;
-  fp32 (*alt_controller_update)(Motor *motor, Controller *controller);
 } RMD_Motor;
 
 #endif

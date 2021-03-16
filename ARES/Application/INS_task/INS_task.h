@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "cmsis_os.h"
+#include "motion_fx.h"
 #include "motion_mc.h"
 
 #define MOTIONFX_INIT_TIME 5

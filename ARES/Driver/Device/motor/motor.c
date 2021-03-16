@@ -43,15 +43,15 @@ extern void RMD_Motor_SetAngle(Motor *self, fp32 rad, uint32_t timeout);
 extern void VESC_Motor_SetAngle(Motor *self, fp32 rad, uint32_t timeout);
 
 extern void RM_Motor_SetAltController(Motor *self, Controller *alt_controller,
-                                      fp32 (*alt_controller_update)(Motor *motor, Controller *controller));
+                                      MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller));
 extern void RMD_Motor_SetAltController(Motor *self, Controller *alt_controller,
-                                       fp32 (*alt_controller_update)(Motor *motor, Controller *controller));
+                                       MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller));
 extern void VESC_Motor_SetAltController(Motor *self, Controller *alt_controller,
-                                        fp32 (*alt_controller_update)(Motor *motor, Controller *controller));
+                                        MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller));
 
-extern void RM_Motor_AltControl(Motor *self, MotorInstructType type, uint32_t timeout);
-extern void RMD_Motor_AltControl(Motor *self, MotorInstructType type, uint32_t timeout);
-extern void VESC_Motor_AltControl(Motor *self, MotorInstructType type, uint32_t timeout);
+extern void RM_Motor_AltControl(Motor *self, uint32_t timeout);
+extern void RMD_Motor_AltControl(Motor *self, uint32_t timeout);
+extern void VESC_Motor_AltControl(Motor *self,  uint32_t timeout);
 
 extern Motor *RM_Motor_Find(CAN_Device device, uint8_t id);
 extern Motor *RMD_Motor_Find(CAN_Device device, uint8_t id);
@@ -69,9 +69,9 @@ void (*SetSpeedTable[])(Motor *self, fp32 rpm, uint32_t timeout)       = {NULL, 
 void (*SetAngleTable[])(Motor *self, fp32 rad, uint32_t timeout)       = {NULL, RM_Motor_SetAngle, VESC_Motor_SetAngle,
                                                                     RMD_Motor_SetAngle};
 void (*SetAltControllerTable[])(Motor *self, Controller *alt_controller,
-                                fp32 (*alt_controller_update)(Motor *motor, Controller *controller)) = {
+                                MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller)) = {
     NULL, RM_Motor_SetAltController, VESC_Motor_SetAltController, RMD_Motor_SetAltController};
-void (*AltControlTable[])(Motor *self, MotorInstructType type,
+void (*AltControlTable[])(Motor *self,
                           uint32_t timeout) = {NULL, RM_Motor_AltControl, VESC_Motor_AltControl, RMD_Motor_AltControl};
 Motor *(*FindTable[])(CAN_Device device, uint8_t id) = {NULL, RM_Motor_Find, VESC_Motor_Find, RMD_Motor_Find};
 
@@ -82,10 +82,10 @@ void Motor_SetCurrent(Motor *self, fp32 mA, uint32_t timeout) { SetCurrentTable[
 void Motor_SetSpeed(Motor *self, fp32 rpm, uint32_t timeout) { SetSpeedTable[self->info.type](self, rpm, timeout); }
 void Motor_SetAngle(Motor *self, fp32 rad, uint32_t timeout) { SetAngleTable[self->info.type](self, rad, timeout); }
 void Motor_SetAltController(Motor *self, Controller *alt_controller,
-                            fp32 (*alt_controller_update)(Motor *motor, Controller *controller)) {
+                            MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller)) {
   SetAltControllerTable[self->info.type](self, alt_controller, alt_controller_update);
 }
-void Motor_AltControl(Motor *self, MotorInstructType type, uint32_t timeout) {
-  AltControlTable[self->info.type](self, type, timeout);
+void Motor_AltControl(Motor *self, uint32_t timeout) {
+  AltControlTable[self->info.type](self, timeout);
 }
 Motor *CAN_Find_Motor(MotorType type, CAN_Device device, uint8_t id) {return FindTable[type](device, id); }

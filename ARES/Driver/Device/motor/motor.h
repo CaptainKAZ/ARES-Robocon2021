@@ -38,7 +38,8 @@ typedef struct {
 } MotorInfo;
 
 typedef enum {
-  INSTRUCT_CURRENT = 0, //电流控制，单位为mA
+  INSTRUCT_EASE = 0,    //不控制 不发出CAN帧 节约带宽
+  INSTRUCT_CURRENT,     //电流控制，单位为mA
   INSTRUCT_SPEED,       //转速控制，单位为RPM
   INSTRUCT_ANGLE,       //角度控制，弧度制
   INSTRUCT_ALTERNATIVE, //使用备选控制器
@@ -47,20 +48,24 @@ typedef enum {
 typedef struct {
   MotorInstructType type;
   fp32              set;
-  int32_t          timeout; //控制超时，单位为ms
+  int32_t           timeout; //控制超时，单位为ms
 } MotorInstruct;
 
 typedef struct {
-  fp32 current;
-  fp32 speed;
-  fp32 angle;
-  fp32 temperature;
+  fp32    current;
+  fp32    speed;
+  fp32    angle;
+  fp32    temperature;
+  fp32    zero;
+  int32_t cumulative_turn;
 } MotorStatus;
 
 typedef struct Motor {
   MotorInfo     info;
   MotorStatus   status;
   MotorInstruct instruct;
+  Controller *  alt_controller;
+  MotorInstructType (*alt_controller_update)(struct Motor *motor, Controller *controller);
 } Motor;
 
 extern void Motor_SetSpeedPID(Motor *self, PID_ControllerParam *param);
@@ -70,8 +75,8 @@ extern void Motor_SetCurrent(Motor *self, fp32 mA, uint32_t timeout);
 extern void Motor_SetSpeed(Motor *self, fp32 rpm, uint32_t timeout);
 extern void Motor_SetAngle(Motor *self, fp32 rad, uint32_t timeout);
 extern void Motor_SetAltController(Motor *self, Controller *alt_controller,
-                            fp32 (*alt_controller_update)(Motor *motor, Controller *controller));
-extern void Motor_AltControl(Motor *self, MotorInstructType type, uint32_t timeout);
-Motor *CAN_Find_Motor(MotorType type, CAN_Device device, uint8_t id);
+                                   MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller));
+extern void Motor_AltControl(Motor *self, uint32_t timeout);
+Motor *     CAN_Find_Motor(MotorType type, CAN_Device device, uint8_t id);
 
 #endif

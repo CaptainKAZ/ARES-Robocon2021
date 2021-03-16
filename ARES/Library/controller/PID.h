@@ -21,7 +21,7 @@
 #include "stopwatch.h"
 
 typedef enum {
-  NORMAL,
+  NORMAL_INT,
   CLAMPING_INT,
   BACK_CALCULATION_INT,
 } PID_IntegratorType;

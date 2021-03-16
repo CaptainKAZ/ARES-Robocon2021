@@ -71,11 +71,14 @@ fp32 toc(stopwatch_t *stopwatch) {
   * @return   fp32      计时器停止时候的时间，单位为秒
   */
 fp32 stopwatch_disable(stopwatch_t *stopwatch) {
-  if (stopwatch->enable) {
-    stopwatch->enable = DISABLE;
+  if (stopwatch->enable) { 
     int32_t this_us = htim6.Instance->CNT;
     fp32 ret=1e-2 *stopwatch-> dms + 1.0e-6f * (this_us- stopwatch->last_us);
     stopwatch->dms    = 0;
+    if(ret<0){
+      ret+=0.01f;
+    }
+    stopwatch->enable = DISABLE;
     return ret;
   } else {
     return 0;

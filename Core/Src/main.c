@@ -31,7 +31,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "sbus.h"
+#include "user_init.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,16 +105,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM3_Init();
   MX_TIM6_Init();
+  MX_UART7_Init();
   /* USER CODE BEGIN 2 */
-  HAL_GPIO_WritePin(PWR0_GPIO_Port, PWR0_Pin, GPIO_PIN_SET);
-  HAL_Delay(100);
-  HAL_GPIO_WritePin(PWR1_GPIO_Port, PWR1_Pin, GPIO_PIN_SET);
-  HAL_Delay(100);
-  HAL_GPIO_WritePin(PWR2_GPIO_Port, PWR2_Pin, GPIO_PIN_SET);
-  HAL_Delay(100);
-  HAL_GPIO_WritePin(PWR3_GPIO_Port, PWR3_Pin, GPIO_PIN_SET);
-  sbus_init();
-  HAL_TIM_Base_Start_IT(&htim6);
+  User_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -216,6 +209,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+  while (1) {};
 
   /* USER CODE END Error_Handler_Debug */
 }

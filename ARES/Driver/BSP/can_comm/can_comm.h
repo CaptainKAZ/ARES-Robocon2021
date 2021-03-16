@@ -46,5 +46,6 @@ typedef struct {
 
 extern void CAN_RxHook(CAN_Frame *frame);
 extern void CAN_Tx(CAN_Frame *frame);
-extern void CAN_Start(CAN_HandleTypeDef *hcan);
+
+extern void CAN_Start(CAN_Device device);
 #endif

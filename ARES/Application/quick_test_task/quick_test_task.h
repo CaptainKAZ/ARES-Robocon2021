@@ -7,15 +7,20 @@
   *                             /_/  |_|/_/ |_|/_____/ /____/ 
   *                        Association of Robotics Engineers at SUSTech
   * 
-  * @file     state_steaming.h
+  * @file     quick_test_task.h
   * @author   Zou Yuanhao (11810102@mail.sustech.edu.cn)
-  * @brief    流式反馈数据任务
+  * @brief    
   * @version  0.1
-  * @date     2021-01-23
+  * @date     2021-03-14
   * 
   * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
   */
+#ifndef QUICK_TEST_TASK
+#define QUICK_TEST_TASK
+#include "main.h"
+#include "cmsis_os.h"
+#include "sbus.h"
+#include "PID.h"
+#include "motor.h"
 
-#define MSG_BUF_SIZE 64
-#define STATE_STEAMING_INIT_TIME 20
-#define PACK_SIZE 20
+#endif

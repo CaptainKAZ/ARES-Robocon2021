@@ -41,8 +41,6 @@ void MX_CAN1_Init(void);
 void MX_CAN2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-void CAN_Filter_Init(CAN_HandleTypeDef *hcan);
-void CAN_Start(CAN_HandleTypeDef *hcan);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

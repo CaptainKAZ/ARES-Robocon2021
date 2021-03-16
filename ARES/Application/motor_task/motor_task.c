@@ -23,8 +23,6 @@ extern void RMD_Motor_Execute(void);
 
 void motor_task(void *pvParameters) {
   TickType_t xLastWakeTime;
-  CAN_Start(&hcan1);
-  CAN_Start(&hcan2);
 
   vTaskDelay(MOTOR_INIT_TIME);
   while (1) {

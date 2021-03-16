@@ -17,12 +17,13 @@
   */
 #include "PID.h"
 #include "user_lib.h"
+#include "math.h"
 
 #define PID ((PID_Controller *)self)
 #define PIDPARAM ((PID_ControllerParam *)(((Controller *)self)->param))
 
 #define PID_NEEDINT(self)                                                                                                     \
-  ((PIDPARAM->Int_type == CLAMPING_INT) ? ((ABS(PID->out[1]) <= PID->general.constrain->O_Hlim[0]) ||                   \
+  ((PIDPARAM->Int_type == CLAMPING_INT) ? ((ABS(PID->out[1]) <= PID->general.constrain->O_Hlim[0]) ||                         \
                                            (SIGN(PID->out[1]) ^ (SIGN(PIDPARAM->kI) ^ SIGN(PID->err[0]))))                    \
                                         : 1)
 
@@ -80,32 +81,32 @@ fp32 PID_ControllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) {
     }
     if (PIDPARAM->N != 0) {
       PID->Dout[1] = PID->Dout[0];
-      PID->Dout[0] = PIDPARAM->kD * (PIDPARAM->N * (PID->err[0] - PID->DInt));
+      PID->Dout[0] = PIDPARAM->kD * (PIDPARAM->N * PID->err[0] - PID->DInt);
       PID->DInt += 0.5f * PID->dt * (PID->Dout[0] + PID->Dout[1]);
     } else {
       PID->Dout[0] = PIDPARAM->kD * (PID->err[0] - PID->err[1]) / PID->dt;
     }
     PID->out[0] = PID->out[1] = PID->Pout + PID->Iout + PID->Dout[0];
 
-    CLAMP(PID->out[0],self->constrain->O_Llim[0], self->constrain->O_Hlim[0]);
-    return PID->out[0];
+    CLAMP(PID->out[0], self->constrain->O_Llim[0], self->constrain->O_Hlim[0]);
+    return isnan(PID->out[0]) ? 0 : PID->out[0];
   case PIDINC_CONTROLLER:
     PID->Pout = PIDPARAM->kP * (PID->err[0] - PID->err[1]);
     PID->Iout = PIDPARAM->kI * (PID->err[0]);
-    CLAMP(PID->Iout, -PIDPARAM->max_Iout,PIDPARAM->max_Iout);
+    CLAMP(PID->Iout, -PIDPARAM->max_Iout, PIDPARAM->max_Iout);
     if (PIDPARAM->N == 0) {
       PID->Dout[0] = PIDPARAM->kD * (PID->err[0] - 2 * PID->err[1] + PID->err[2]);
     } else {
       PID->Dout[1] = PID->Dout[0];
-      PID->Dout[0] = PIDPARAM->kD * (PIDPARAM->N * (PID->err[0] - PID->err[1] - PID->DInt));
+      PID->Dout[0] = PIDPARAM->kD * (PIDPARAM->N * (PID->err[0] - PID->err[1]) - PID->DInt);
       PID->DInt += 0.5f * PID->dt * (PID->Dout[0] + PID->Dout[1]);
     }
     PID->out[0] += PID->dt * 0.5f * (PID->out[1] + PID->Pout + PID->Iout + PID->Dout[0]);
     PID->out[1] = PID->Pout + PID->Iout + PID->Dout[0];
 
     CLAMP(PID->out[0], self->constrain->O_Llim[0], self->constrain->O_Hlim[0]);
-    return PID->out[0];
-  default :return 0;
+    return isnan(PID->out[0]) ? 0 : PID->out[0];
+  default: return 0;
   }
 }
 

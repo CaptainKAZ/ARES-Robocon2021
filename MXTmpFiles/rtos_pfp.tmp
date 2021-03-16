@@ -1,4 +1,0 @@
-void motor_task(void *argument);
-void quick_test_task(void *argument);
-void INS_task(void *argument);
-void state_steaming_task(void *argument);#n

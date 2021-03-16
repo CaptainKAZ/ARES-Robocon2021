@@ -85,16 +85,16 @@ void RMD_Motor_RxHook(CAN_Frame *frame) {
   fp32    last_angle = rmd_motor[frame->device][id].general.status.angle;
   if (rmd_motor[frame->device][id].general.info.type == NONE_MOTOR ||
       xTaskGetTickCount() - rmd_motor[frame->device][id].rx_timestamp > 10) {
-    RMD_Motor_Init((Motor*)&rmd_motor[frame->device][id], frame->device, id);
+    RMD_Motor_Init((Motor *)&rmd_motor[frame->device][id], frame->device, id);
     PARSE_RMD_MOTOR(&(rmd_motor[frame->device][id].general.status), frame->data);
     rmd_motor[frame->device][id].rx_timestamp = xTaskGetTickCount();
   } else if (rmd_motor[frame->device][id].general.info.type == RMD_MOTOR) {
     PARSE_RMD_MOTOR(&(rmd_motor[frame->device][id].general.status), frame->data);
     rmd_motor[frame->device][id].rx_timestamp = xTaskGetTickCount();
     if (rmd_motor[frame->device][id].general.status.angle - last_angle > PI) {
-      rmd_motor[frame->device][id].cumulative_turn--;
+      rmd_motor[frame->device][id].general.status.cumulative_turn--;
     } else if (rmd_motor[frame->device][id].general.status.angle - last_angle < -PI) {
-      rmd_motor[frame->device][id].cumulative_turn++;
+      rmd_motor[frame->device][id].general.status.cumulative_turn++;
     }
   }
 }
@@ -107,7 +107,7 @@ void RMD_Motor_SetSpeedPID(Motor *self, PID_ControllerParam *param) {
     return;
   }
   xSemaphoreTake(RMD_Motor_Mutex, portMAX_DELAY);
-  controllerSetParam((Controller* )&RM->speed_pid,(ControllerParam *) param);
+  controllerSetParam((Controller *)&RM->speed_pid, (ControllerParam *)param);
   xSemaphoreGive(RMD_Motor_Mutex);
 }
 
@@ -119,7 +119,7 @@ void RMD_Motor_SetAnglePID(Motor *self, PID_ControllerParam *param) {
     return;
   }
   xSemaphoreTake(RMD_Motor_Mutex, portMAX_DELAY);
-  controllerSetParam((Controller* )&RM->angle_pid, (ControllerParam *)param);
+  controllerSetParam((Controller *)&RM->angle_pid, (ControllerParam *)param);
   xSemaphoreGive(RMD_Motor_Mutex);
 }
 
@@ -131,8 +131,8 @@ void RMD_Motor_Zero(Motor *self) {
     return;
   }
   xSemaphoreTake(RMD_Motor_Mutex, portMAX_DELAY);
-  RM->zero            = MOTOR->status.angle;
-  RM->cumulative_turn = 0;
+  MOTOR->status.zero            = MOTOR->status.angle;
+  MOTOR->status.cumulative_turn = 0;
   xSemaphoreGive(RMD_Motor_Mutex);
 }
 
@@ -179,7 +179,7 @@ void RMD_Motor_SetAngle(Motor *self, fp32 rad, uint32_t timeout) {
 }
 
 void RMD_Motor_SetAltController(Motor *self, Controller *alt_controller,
-                                fp32 (*alt_controller_update)(Motor *motor, Controller *controller)) {
+                                MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller)) {
   if (RMD_Motor_Mutex == NULL) {
     RMD_Motor_Mutex = xSemaphoreCreateMutexStatic(&RMD_Motor_MutexBuffer);
   }
@@ -187,9 +187,8 @@ void RMD_Motor_SetAltController(Motor *self, Controller *alt_controller,
     return;
   }
   xSemaphoreTake(RMD_Motor_Mutex, portMAX_DELAY);
-  MOTOR->instruct.type      = INSTRUCT_ALTERNATIVE;
-  RM->alt_controller        = alt_controller;
-  RM->alt_controller_update = alt_controller_update;
+  MOTOR->alt_controller        = alt_controller;
+  MOTOR->alt_controller_update = alt_controller_update;
   xSemaphoreGive(RMD_Motor_Mutex);
 }
 
@@ -209,7 +208,7 @@ void RMD_Motor_AltControl(Motor *self, MotorInstructType type, uint32_t timeout)
 
 Motor *RMD_Motor_Find(CAN_Device device, uint8_t id) {
   if (rmd_motor[device][id].general.info.type == RMD_MOTOR) {
-    return (Motor* )&(rmd_motor[device][id]);
+    return (Motor *)&(rmd_motor[device][id]);
   }
   return NULL;
 }
@@ -249,33 +248,41 @@ void RMD_Motor_Execute(void) {
           switch (rmd_motor[i][j].general.instruct.type) {
           case INSTRUCT_CURRENT: rmd_motor[i][j].set_current = rmd_motor[i][j].general.instruct.set; break;
           case INSTRUCT_SPEED:
-            rmd_motor[i][j].set_current = controllerUpdate((Controller*)&rmd_motor[i][j].speed_pid, &rmd_motor[i][j].general.instruct.set,
-                                                           &rmd_motor[i][j].general.status.speed, NULL);
+            rmd_motor[i][j].set_current =
+                controllerUpdate((Controller *)&rmd_motor[i][j].speed_pid, &rmd_motor[i][j].general.instruct.set,
+                                 &rmd_motor[i][j].general.status.speed, NULL);
             break;
           case INSTRUCT_ANGLE:
-            set_speed = controllerUpdate((Controller*)&rmd_motor[i][j].angle_pid, &rmd_motor[i][j].general.instruct.set,
+            set_speed = controllerUpdate((Controller *)&rmd_motor[i][j].angle_pid, &rmd_motor[i][j].general.instruct.set,
                                          &rmd_motor[i][j].general.status.angle, NULL);
-            rmd_motor[i][j].set_current =
-                controllerUpdate((Controller*)&rmd_motor[i][j].speed_pid, &set_speed, &rmd_motor[i][j].general.status.speed, NULL);
+            rmd_motor[i][j].set_current = controllerUpdate((Controller *)&rmd_motor[i][j].speed_pid, &set_speed,
+                                                           &rmd_motor[i][j].general.status.speed, NULL);
             break;
           case INSTRUCT_ALTERNATIVE:
-            rmd_motor[i][j].set_current =
-                rmd_motor[i][j].alt_controller_update((Motor*)&rmd_motor[i][j], rmd_motor[i][j].alt_controller);
+            rmd_motor[i][j].general.alt_controller_update((Motor *)&rmd_motor[i][j], rmd_motor[i][j].general.alt_controller);
             break;
           default: break;
           }
         } else {
           //指令已超时
-          rmd_motor[i][j].general.instruct.timeout = 0;
+          if(rmd_motor[i][j].general.instruct.timeout == 0){
           rmd_motor[i][j].general.instruct.type    = INSTRUCT_CURRENT;
+          }else{
+            rmd_motor[i][j].general.instruct.type = INSTRUCT_EASE;
+            rmd_motor[i][j].general.instruct.timeout = 0;
+          }
           rmd_motor[i][j].set_current = rmd_motor[i][j].general.instruct.set = 0;
         }
       }
     }
   }
   xSemaphoreGive(RMD_Motor_Mutex);
-  RMD_Motor_Command(rmd_motor[0][0].set_current, rmd_motor[0][1].set_current, rmd_motor[0][2].set_current,
-                    rmd_motor[0][3].set_current, RMD_MULTI_FRAME_HEAD, INTERNAL_CAN1);
-  RMD_Motor_Command(rmd_motor[1][0].set_current, rmd_motor[1][1].set_current, rmd_motor[1][2].set_current,
-                    rmd_motor[1][3].set_current, RMD_MULTI_FRAME_HEAD, INTERNAL_CAN2);
+  if (rmd_motor[0][0].general.instruct.type != INSTRUCT_EASE || rmd_motor[0][1].general.instruct.type != INSTRUCT_EASE ||
+      rmd_motor[0][2].general.instruct.type != INSTRUCT_EASE || rmd_motor[0][3].general.instruct.type != INSTRUCT_EASE)
+    RMD_Motor_Command(rmd_motor[0][0].set_current, rmd_motor[0][1].set_current, rmd_motor[0][2].set_current,
+                      rmd_motor[0][3].set_current, RMD_MULTI_FRAME_HEAD, INTERNAL_CAN1);
+  if (rmd_motor[1][0].general.instruct.type != INSTRUCT_EASE || rmd_motor[1][1].general.instruct.type != INSTRUCT_EASE ||
+      rmd_motor[1][2].general.instruct.type != INSTRUCT_EASE || rmd_motor[1][3].general.instruct.type != INSTRUCT_EASE)
+    RMD_Motor_Command(rmd_motor[1][0].set_current, rmd_motor[1][1].set_current, rmd_motor[1][2].set_current,
+                      rmd_motor[1][3].set_current, RMD_MULTI_FRAME_HEAD, INTERNAL_CAN2);
 }

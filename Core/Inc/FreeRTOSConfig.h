@@ -58,8 +58,8 @@
 #define configUSE_PREEMPTION                     1
 #define configSUPPORT_STATIC_ALLOCATION          1
 #define configSUPPORT_DYNAMIC_ALLOCATION         1
-#define configUSE_IDLE_HOOK                      0
-#define configUSE_TICK_HOOK                      0
+#define configUSE_IDLE_HOOK                      1
+#define configUSE_TICK_HOOK                      1
 #define configCPU_CLOCK_HZ                       ( SystemCoreClock )
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
 #define configMAX_PRIORITIES                     ( 56 )
@@ -78,7 +78,7 @@
 /* USER CODE BEGIN MESSAGE_BUFFER_LENGTH_TYPE */
 /* Defaults to size_t for backward compatibility, but can be changed
    if lengths will always be less than the number of bytes in a size_t. */
-#define configMESSAGE_BUFFER_LENGTH_TYPE         size_t
+#define configMESSAGE_BUFFER_LENGTH_TYPE size_t
 /* USER CODE END MESSAGE_BUFFER_LENGTH_TYPE */
 
 /* Co-routine definitions. */
@@ -141,7 +141,12 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 /* Normal assert() semantics without relying on the provision of an assert.h
 header file. */
 /* USER CODE BEGIN 1 */
-#define configASSERT( x ) if ((x) == 0) {taskDISABLE_INTERRUPTS(); for( ;; );}
+#define configASSERT(x)                                                                                                       \
+  if ((x) == 0) {                                                                                                             \
+    taskDISABLE_INTERRUPTS();                                                                                                 \
+    for (;;)                                                                                                                  \
+      ;                                                                                                                       \
+  }
 /* USER CODE END 1 */
 
 /* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
@@ -156,6 +161,15 @@ standard names. */
 
 /* USER CODE BEGIN Defines */
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
+#define traceTASK_SWITCHED_IN()                                                                                               \
+  extern void StartIdleMonitor(void);                                                                                         \
+  StartIdleMonitor()
+
+#define traceTASK_SWITCHED_OUT()\
+extern void EndIdleMonitor(void);\
+EndIdleMonitor()
+
+
 /* USER CODE END Defines */
 
 #endif /* FREERTOS_CONFIG_H */

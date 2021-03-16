@@ -19,15 +19,13 @@
 #include "INS_task.h"
 #include "cmsis_os.h"
 #include "spi.h"
-#include "motion_fx.h"
-#include "motion_mc.h"
 #include "imu.h"
 #include "stopwatch.h"
-#include "string.h"
-#include <stdio.h>
+#include "feedback_task.h"
 #include "user_lib.h"
 #include "PID.h"
 #include "tim.h"
+#include "flash_io.h"
 
 MFX_output_t      motionFX_output;
 TaskHandle_t      INS_task_handle;
@@ -43,9 +41,10 @@ static TickType_t      last_wake_time;
 static float           delta_time;
 static imu_cal_t       imu_cal;
 
+
 static PID_Controller      temperature_pid;
 static PID_ControllerParam temperature_pid_param = {
-    .general.type = PIDPOS_CONTROLLER, .Int_type = CLAMPING_INT, .kB = 0, .kP = 10, .kI = 5, .kD = 2, .max_Iout = 500, .N = 0};
+    .general.type = PIDPOS_CONTROLLER, .Int_type = BACK_CALCULATION_INT, .kB = 0.5, .kP = 3000, .kI = 300, .kD = 15, .max_Iout = 9000, .N = 10};
 static fp32                temperature_O_Hlim      = 9999;
 static fp32                temperature_O_Llim      = 0;
 static fp32                temperature_I_loop_Llim = 0;
@@ -54,8 +53,8 @@ static ControllerConstrain temperature_constrain   = {.I_loop_Hlim = &temperatur
                                                     .I_loop_Llim = &temperature_I_loop_Llim,
                                                     .O_Hlim      = &temperature_O_Hlim,
                                                     .O_Llim      = &temperature_O_Llim};
-static fp32 imu_ctrl_tempretrue=IMU_TEMPERATRUE;
-                                                    
+static fp32                imu_ctrl_tempretrue     = IMU_TEMPERATRUE;
+
 static void MotionFX_get_input(MFX_input_t *MFX_input, mpu_real_data_t *mpu6500_real_data,
                                ist_real_data_t *ist8310_real_data) {
   MFX_input->acc[0]  = mpu6500_real_data->accel[0];
@@ -89,6 +88,9 @@ static void MotionFX_Init(void) {
   MotionFX_initialize();
   MotionFX_getKnobs(&knobs);
   knobs.start_automatic_gbias_calculation = 1; //设置为1，开机后需静置10s
+  knobs.MTime                             = 2.0f;
+  //knobs.ATime                             = 0.7f;
+  //knobs.FrTime                            = 0.66f;
   knobs.LMode                             = 1;
   knobs.modx                              = 1; //每调用几次推理调用一次更新
   knobs.output_type                       = MFX_ENGINE_OUTPUT_ENU;
@@ -117,8 +119,8 @@ static HAL_StatusTypeDef MPU_SPI_speed_change(SPI_HandleTypeDef *hspi) {
 }
 
 uint8_t load_cal_data(imu_cal_t *data) {
-  if (((imu_cal_t *)MFX_DATA_ADDRESS)->head == IMU_CAL_HEAD) {
-    memcpy(&data, (void *)MFX_DATA_ADDRESS, sizeof(imu_cal_t));
+  if (((imu_cal_t *)FLASH_READ)->head == IMU_CAL_HEAD) {
+    Flash_Get((uint8_t*)data, sizeof(imu_cal_t));
     return SUCCESS;
   } else {
     return FAIL;
@@ -126,23 +128,19 @@ uint8_t load_cal_data(imu_cal_t *data) {
 }
 
 uint8_t save_cal_data(imu_cal_t *data) {
-  if (HAL_FLASH_Unlock() != HAL_OK) {
-    return FAIL;
-  }
-  for (uint8_t i = 0; i < sizeof(imu_cal_t); i++) {
-    if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, MFX_DATA_ADDRESS + i * 8, ((uint8_t *)data)[i]) != HAL_OK) {
-      return FAIL;
-    }
-  }
-  if (HAL_FLASH_Lock() != HAL_OK) {
-    return FAIL;
-  }
-  return SUCCESS;
+  return Flash_Save((uint8_t*)data, sizeof(imu_cal_t));
 }
 
 void INS_task(void *pvParameters) {
   //延迟等待系统稳定
   vTaskDelay(MOTIONFX_INIT_TIME);
+  feedback_register(&motionFX_output.quaternion_9X[0], 0);
+  feedback_register(&motionFX_output.quaternion_9X[1], 1);
+  feedback_register(&motionFX_output.quaternion_9X[2], 2);
+  feedback_register(&motionFX_output.quaternion_9X[3], 3);
+  feedback_register(&mpu6500_real_data.temp, 4);
+  feedback_register(&temperature_pid.out[0],5);
+  feedback_register(&temperature_pid.Dout[0], 6);
   //初始化MPU6500
   while (mpu_init() != MPU6500_NO_ERROR) {
     ;
@@ -156,16 +154,21 @@ void INS_task(void *pvParameters) {
   //提高SPI传输速度
   MPU_SPI_speed_change(&hspi5);
   //初始化PID
-  PID_ControllerInit(&temperature_pid, &temperature_constrain, &temperature_pid_param, 0.02);
+  PID_ControllerInit(&temperature_pid, &temperature_constrain, &temperature_pid_param, 0.05);
   //启动MotionFX
   MotionFX_Init();
   MotionMC_Initialize(10, 1);
   MotionFX_enable_9X(MFX_ENGINE_ENABLE);
+  MotionFX_enable_6X(MFX_ENGINE_DISABLE);
   MotionFX_MagCal_init(0, MFX_ENGINE_DISABLE);
   stopwatch_register(&stopwatch);
   if (load_cal_data(&imu_cal) == SUCCESS) {
     INS_task_status.imu_calibrated = 1;
     MotionMC_Initialize(0, 0);
+    MotionFX_setGbias(imu_cal.gbias);
+    MotionFX_getKnobs(&knobs);
+    knobs.start_automatic_gbias_calculation = 0;
+    MotionFX_setKnobs(&knobs);
   } else {
     INS_task_status.imu_calibrated  = 0;
     imu_cal.head                    = IMU_CAL_HEAD;
@@ -182,9 +185,11 @@ void INS_task(void *pvParameters) {
       while (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) != pdPASS)
         ;
       imu_get_data(&mpu6500_real_data, &ist8310_real_data);
-      if (xTaskGetTickCount()-last_wake_time>=5) {
-        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2,
-                              controllerUpdate((Controller *)&temperature_pid, &imu_ctrl_tempretrue, &mpu6500_real_data.temp, NULL));
+      if (xTaskGetTickCount() - last_wake_time >= 5) {
+        __HAL_TIM_SET_COMPARE(
+            &htim3, TIM_CHANNEL_2,
+            controllerUpdate((Controller *)&temperature_pid, &imu_ctrl_tempretrue, &mpu6500_real_data.temp, NULL));
+          last_wake_time = xTaskGetTickCount();
       }
     } else {
       vTaskDelayUntil(&last_wake_time, 10);
@@ -192,16 +197,19 @@ void INS_task(void *pvParameters) {
       MotionMC_get_input(&mag_cal_in, &ist8310_real_data);
       MotionMC_Update(&mag_cal_in);
       MotionMC_GetCalParams(&imu_cal.mag_cal);
-      if (imu_cal.mag_cal.CalQuality == MMC_CALQSTATUSGOOD) {
-        INS_task_status.imu_calibrated = 1;
-        MotionFX_getGbias((float *)&imu_cal.gbias);
-        save_cal_data(&imu_cal);
-        MotionMC_Initialize(0, 0);
+      if (imu_cal.mag_cal.CalQuality == MMC_CALQSTATUSGOOD) {   
+        if(xTaskGetTickCount()>=200000){
+          INS_task_status.imu_calibrated = 1;
+          MotionFX_getGbias((float *)&imu_cal.gbias);
+          save_cal_data(&imu_cal);
+          MotionMC_Initialize(0, 0);
+        }
       }
-      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2,
-                            controllerUpdate((Controller *)&temperature_pid, &imu_ctrl_tempretrue, &mpu6500_real_data.temp, NULL));
+      __HAL_TIM_SET_COMPARE(
+          &htim3, TIM_CHANNEL_2,
+          controllerUpdate((Controller *)&temperature_pid, &imu_ctrl_tempretrue, &mpu6500_real_data.temp, NULL));
+      last_wake_time = xTaskGetTickCount();
     }
-    last_wake_time = xTaskGetTickCount();
     MotionFX_get_input(&motionFX_input, &mpu6500_real_data, &ist8310_real_data);
     delta_time = stopwatch_disable(&stopwatch);
     tic(&stopwatch);

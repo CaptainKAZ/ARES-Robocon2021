@@ -25,16 +25,14 @@
 #define RM_MOTOR_FRAME_HEAD_1 0x200
 #define RM_MOTOR_FRAME_HEAD_2 0x1FF
 
+#define M3508_REDUCTION_RATIO 19.20320855614973f
+
 typedef struct {
   Motor          general;
   uint32_t       rx_timestamp;
   PID_Controller speed_pid;
   PID_Controller angle_pid;
   fp32           set_current;
-  fp32           zero;
-  uint32_t       cumulative_turn;
-  Controller *   alt_controller;
-  fp32 (*alt_controller_update)(Motor *motor, Controller *controller);
 } RM_Motor;
 
 #endif

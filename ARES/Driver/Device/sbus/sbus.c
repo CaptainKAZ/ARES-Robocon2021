@@ -2,13 +2,9 @@
 #include "usart.h"
 
 fp32           SBUS_CHANNEL[10];
-static uint8_t SBUS_rx_buf[2][SBUS_RX_BUF_NUM];
+static uint8_t SBUS_rx_buf[2][SBUS_RXBUF_SIZE];
 
 void sbus_init(void) {
-  //使能DMA串口接收
-  SET_BIT(huart1.Instance->CR3, USART_CR3_DMAR);
-  //使能串口空闲中断
-  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
   //停止DMA接收
   __HAL_DMA_DISABLE(&hdma_usart1_rx);
   //由于DMA是AHB总线主设备,和CPU有冲突，所以有可能一次指令不成功
@@ -22,11 +18,15 @@ void sbus_init(void) {
   //将DMA的缓冲区2地址设置为第二个BUFFER
   hdma_usart1_rx.Instance->M1AR = (uint32_t)(&SBUS_rx_buf[1]);
   //DMA接收长度为缓冲区大小
-  hdma_usart1_rx.Instance->NDTR = SBUS_RX_BUF_NUM;
+  hdma_usart1_rx.Instance->NDTR = SBUS_RXBUF_SIZE;
   //使能双缓冲区
   SET_BIT(hdma_usart1_rx.Instance->CR, DMA_SxCR_DBM);
   //使能DMA
   __HAL_DMA_ENABLE(&hdma_usart1_rx);
+  //使能DMA串口接收
+  SET_BIT(huart1.Instance->CR3, USART_CR3_DMAR);
+  //使能串口空闲中断
+  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
 }
 
 static void parse_sbus(volatile const uint8_t *sbus_buf) {
@@ -53,19 +53,19 @@ void sbus_hook(void) {
 
   __HAL_UART_CLEAR_PEFLAG(&huart1);
   __HAL_DMA_DISABLE(&hdma_usart1_rx);
-  this_time_rx_len              = SBUS_RX_BUF_NUM - hdma_usart1_rx.Instance->NDTR;
-  hdma_usart1_rx.Instance->NDTR = SBUS_RX_BUF_NUM;
+  this_time_rx_len              = SBUS_RXBUF_SIZE - hdma_usart1_rx.Instance->NDTR;
+  hdma_usart1_rx.Instance->NDTR = SBUS_RXBUF_SIZE;
 
   if ((hdma_usart1_rx.Instance->CR & DMA_SxCR_CT) == RESET) {
     hdma_usart1_rx.Instance->CR |= DMA_SxCR_CT;
     __HAL_DMA_ENABLE(&hdma_usart1_rx);
-    if (this_time_rx_len == RC_FRAME_LENGTH) {
+    if (this_time_rx_len == SBUS_FRAME_LENGTH) {
       parse_sbus(SBUS_rx_buf[0]);
     }
   } else {
     hdma_usart1_rx.Instance->CR &= ~(DMA_SxCR_CT);
     __HAL_DMA_ENABLE(&hdma_usart1_rx);
-    if (this_time_rx_len == RC_FRAME_LENGTH) {
+    if (this_time_rx_len == SBUS_FRAME_LENGTH) {
       parse_sbus(SBUS_rx_buf[1]);
     }
   }

@@ -24,6 +24,7 @@
 #include "INS_task.h"
 #include "can_comm.h"
 #include "tim.h"
+#include "ops.h"
 
 /**
   * @brief    TIM6中断服务程序，负责计时器更新
@@ -80,7 +81,11 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
      }
   }
 }
-
+/**
+  * @brief    CAN接收完成中断，负责CAN设备更新
+  * 
+  * @param    hcan      
+  */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
   uint8_t           CAN_RxData[8];
   CAN_RxHeaderTypeDef RxMsgHdr;
@@ -92,4 +97,15 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
   frame.len    = RxMsgHdr.DLC;
   frame.type   = RxMsgHdr.IDE == CAN_ID_STD ? CAN_FRAME_STD : CAN_FRAME_EXT;
   CAN_RxHook(&frame);
+}
+
+void UART7_IRQHandler(void) {
+  if(huart7.Instance->SR & UART_FLAG_RXNE){
+    __HAL_UART_CLEAR_PEFLAG(&huart7);
+    __HAL_UART_FLUSH_DRREGISTER(&huart7);
+    return;
+  }
+  if (huart7.Instance->SR & UART_FLAG_IDLE) {
+    ops_hook();
+  }
 }

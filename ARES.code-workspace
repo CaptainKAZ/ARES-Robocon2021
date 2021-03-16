@@ -36,7 +36,10 @@
       "can_comm.h": "c",
       "semphr.h": "c",
       "cmsis_os.h": "c",
-      "sbus.h": "c"
+      "sbus.h": "c",
+      "ops.h": "c",
+      "led_monitor_task.h": "c",
+      "rm_motor.h": "c"
     },
 	},
 	"extensions": {

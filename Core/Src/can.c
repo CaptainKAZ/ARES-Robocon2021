@@ -194,37 +194,6 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void CAN_Filter_Init(CAN_HandleTypeDef *hcan) {
-  CAN_FilterTypeDef CAN_FilterConfig;
-
-  CAN_FilterConfig.FilterBank  = 0;
-  CAN_FilterConfig.FilterMode  = CAN_FILTERMODE_IDMASK;
-  CAN_FilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-
-  CAN_FilterConfig.FilterIdHigh = 0;
-  CAN_FilterConfig.FilterIdLow  = 0;
-
-  CAN_FilterConfig.FilterMaskIdHigh     = 0;
-  CAN_FilterConfig.FilterMaskIdLow      = 0;
-  CAN_FilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-
-  CAN_FilterConfig.FilterActivation     = ENABLE;
-  CAN_FilterConfig.SlaveStartFilterBank = 14;
-
-  if (HAL_CAN_ConfigFilter(hcan, &CAN_FilterConfig) != HAL_OK) {
-    Error_Handler();
-  }
-}
-
-void CAN_Start(CAN_HandleTypeDef *hcan){
-  CAN_Filter_Init(hcan);
-  if (HAL_CAN_Start(hcan) != HAL_OK) {
-    Error_Handler();
-  }
-  if (HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
-    Error_Handler();
-  }
-}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
