@@ -717,6 +717,11 @@
               <FileType>1</FileType>
               <FilePath>..\ARES\Library\cpu_utils\cpu_utils.c</FilePath>
             </File>
+            <File>
+              <FileName>quintic_trajactory.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Library\algorithm\quintic_trajactory.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

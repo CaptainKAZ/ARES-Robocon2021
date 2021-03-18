@@ -138,9 +138,6 @@ void INS_task(void *pvParameters) {
   feedback_register(&motionFX_output.quaternion_9X[1], 1);
   feedback_register(&motionFX_output.quaternion_9X[2], 2);
   feedback_register(&motionFX_output.quaternion_9X[3], 3);
-  feedback_register(&mpu6500_real_data.temp, 4);
-  feedback_register(&temperature_pid.out[0],5);
-  feedback_register(&temperature_pid.Dout[0], 6);
   //初始化MPU6500
   while (mpu_init() != MPU6500_NO_ERROR) {
     ;
