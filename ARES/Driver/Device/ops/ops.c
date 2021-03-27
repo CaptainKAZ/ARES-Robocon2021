@@ -18,14 +18,18 @@
 #include "ops.h"
 #include "string.h"
 
-uint8_t ops_rx_buf[2][OPS_RXBUF_SIZE];
-OPSData OPS_DATA;
+#define OPS_RXBUF_SIZE 56u
+#define OPS_FRAME_LENGTH 28u
 
-void ops_init(void) {
+uint8_t ops_rx_buf[2][OPS_RXBUF_SIZE];
+Ops ops;
+
+void Ops_init(void) {
   //由于DMA是AHB总线主设备,和CPU有冲突，所以有可能一次指令不成功
   while (hdma_uart7_rx.Instance->CR & DMA_SxCR_EN) {
     __HAL_DMA_DISABLE(&hdma_uart7_rx);
   }
+
   //将DMA的外设地址设置为UART7的DR寄存器
   hdma_uart7_rx.Instance->PAR = (uint32_t) & (huart7.Instance->DR);
   //将DMA的缓冲区1地址设置为第一个BUFFER
@@ -38,6 +42,7 @@ void ops_init(void) {
   SET_BIT(hdma_uart7_rx.Instance->CR, DMA_SxCR_DBM);
   //使能DMA
   __HAL_DMA_ENABLE(&hdma_uart7_rx);
+
   //使能DMA串口接收
   SET_BIT(huart7.Instance->CR3, USART_CR3_DMAR);
 
@@ -45,9 +50,9 @@ void ops_init(void) {
   __HAL_UART_ENABLE_IT(&huart7, UART_IT_IDLE);
 }
 
-static void parse_ops(volatile const uint8_t *ops_buf) {
+static void parseOps(volatile const uint8_t *ops_buf) {
   if (ops_buf[0] == 0x0D && ops_buf[1] == 0x0A && ops_buf[26] == 0x0A && ops_buf[27] == 0x0D) {
-    memcpy((uint8_t *)&OPS_DATA,(void*)&ops_buf[2],sizeof(OPSData));
+    memcpy((uint8_t *)&ops,(void*)&ops_buf[2],sizeof(Ops));
   }
 }
 
@@ -55,7 +60,7 @@ static void parse_ops(volatile const uint8_t *ops_buf) {
   * @brief    OPS更新的钩子函数
   * 
   */
-void ops_hook(void) {
+void Ops_hook(void) {
   static uint16_t this_time_rx_len = 0;
 
   __HAL_UART_CLEAR_PEFLAG(&huart7);
@@ -67,13 +72,13 @@ void ops_hook(void) {
     hdma_uart7_rx.Instance->CR |= DMA_SxCR_CT;
     __HAL_DMA_ENABLE(&hdma_uart7_rx);
     if (this_time_rx_len == OPS_FRAME_LENGTH) {
-      parse_ops(ops_rx_buf[0]);
+      parseOps(ops_rx_buf[0]);
     }
   } else {
     hdma_uart7_rx.Instance->CR &= ~(DMA_SxCR_CT);
     __HAL_DMA_ENABLE(&hdma_uart7_rx);
     if (this_time_rx_len == OPS_FRAME_LENGTH) {
-      parse_ops(ops_rx_buf[1]);
+      parseOps(ops_rx_buf[1]);
     }
   }
 }

@@ -33,8 +33,8 @@ void User_Init(void) {
   FLOWLED_OFF(5);
   FLOWLED_OFF(6);
   FLOWLED_OFF(7);
-  sbus_init();
-  ops_init();
+  Sbus_init();
+  Ops_init();
   HAL_TIM_Base_Start_IT(&htim6);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_GPIO_WritePin(PWR0_GPIO_Port, PWR0_Pin, GPIO_PIN_SET);

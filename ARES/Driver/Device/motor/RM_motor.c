@@ -15,7 +15,7 @@
   * 
   * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
   */
-#include "RM_motor.h"
+#include "rm_motor.h"
 #include "cmsis_os.h"
 #include "semphr.h"
 

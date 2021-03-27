@@ -158,7 +158,7 @@ void INS_task(void *pvParameters) {
   MotionFX_enable_9X(MFX_ENGINE_ENABLE);
   MotionFX_enable_6X(MFX_ENGINE_DISABLE);
   MotionFX_MagCal_init(0, MFX_ENGINE_DISABLE);
-  stopwatch_register(&stopwatch);
+  Stopwatch_register(&stopwatch);
   if (load_cal_data(&imu_cal) == SUCCESS) {
     INS_task_status.imu_calibrated = 1;
     MotionMC_Initialize(0, 0);
@@ -174,7 +174,7 @@ void INS_task(void *pvParameters) {
     imu_cal.mag_cal.SF_Matrix[2][2] = 1.0f;
   }
   INS_task_status.imu_initialized = 1;
-  tic(&stopwatch);
+  Stopwatch_tic(&stopwatch);
   last_wake_time = xTaskGetTickCount();
   for (;;) {
     if (INS_task_status.imu_calibrated) {
@@ -208,8 +208,8 @@ void INS_task(void *pvParameters) {
       last_wake_time = xTaskGetTickCount();
     }
     MotionFX_get_input(&motionFX_input, &mpu6500_real_data, &ist8310_real_data);
-    delta_time = stopwatch_disable(&stopwatch);
-    tic(&stopwatch);
+    delta_time = Stopwatch_disable(&stopwatch);
+    Stopwatch_tic(&stopwatch);
     MotionFX_propagate(&motionFX_output, &motionFX_input, &delta_time);
     MotionFX_update(&motionFX_output, &motionFX_input, &delta_time, NULL);
   }

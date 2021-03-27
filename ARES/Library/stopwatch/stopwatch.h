@@ -27,10 +27,10 @@ typedef struct stopwatch_t {
   struct stopwatch_t *next_stopwatch; //指向下一个定时器的指针
 } stopwatch_t;
 
-extern void stopwatch_register(stopwatch_t *stopwatch);
-extern void tic(stopwatch_t *stopwatch);
-extern fp32 toc(stopwatch_t *stopwatch);
-extern fp32 stopwatch_disable(stopwatch_t *stopwatch);
-extern void stopwatch_hook(void);
+extern void Stopwatch_register(stopwatch_t *stopwatch);
+extern void Stopwatch_tic(stopwatch_t *stopwatch);
+extern fp32 Stopwatch_toc(stopwatch_t *stopwatch);
+extern fp32 Stopwatch_disable(stopwatch_t *stopwatch);
+extern void Stopwatch_hook(void);
 
 #endif

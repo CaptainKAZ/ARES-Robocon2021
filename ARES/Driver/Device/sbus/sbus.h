@@ -1,18 +1,34 @@
-#ifndef REMOTE_CONTROL_H
-#define REMOTE_CONTROL_H
+/**
+  * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
+  *                                 ___     ____   ______ _____
+  *                                /   |   / __ \ / ____// ___/
+  *                               / /| |  / /_/ // __/   \__ \
+  *                              / ___ | / _, _// /___  ___/ / 
+  *                             /_/  |_|/_/ |_|/_____/ /____/ 
+  *                        Association of Robotics Engineers at SUSTech
+  * 
+  * @file     sbus.h
+  * @author   ljy
+  * @brief    
+  * @version  0.1
+  * @date     2021-03-26
+  * 
+  * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
+  */
+#ifndef SBUS_H
+#define SBUS_H
 
 #include "main.h"
 
-#define SBUS_RXBUF_SIZE 50u
-#define SBUS_FRAME_LENGTH 25u
+typedef struct {
+  fp32 channel[10];
+  uint32_t updateTime;
+} Sbus;
 
-#define SBUS_VALUE_MAX ((fp32)671)
-#define SBUS_VALUE_OFFSET ((fp32)1024)
+extern Sbus sbus;
 
-extern fp32 SBUS_CHANNEL[10];
-
-extern void sbus_init(void);
-extern void sbus_disable(void);
-extern void sbus_restart(void);
-extern void sbus_hook(void);
+extern void Sbus_init(void);
+extern void Sbus_disable(void);
+extern void Sbus_restart(void);
+extern void Sbus_hook(void);
 #endif

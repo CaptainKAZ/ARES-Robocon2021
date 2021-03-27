@@ -35,7 +35,7 @@ void TIM6_DAC_IRQHandler(void) { if (__HAL_TIM_GET_FLAG(&htim6, TIM_FLAG_UPDATE)
     if (__HAL_TIM_GET_IT_SOURCE(&htim6, TIM_IT_UPDATE) != RESET)
     {
       __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
-        stopwatch_hook();
+        Stopwatch_hook();
 
     }
   } }
@@ -46,7 +46,7 @@ void TIM6_DAC_IRQHandler(void) { if (__HAL_TIM_GET_FLAG(&htim6, TIM_FLAG_UPDATE)
   */
 void USART1_IRQHandler(void) {
   if (huart1.Instance->SR & UART_FLAG_IDLE) {
-    sbus_hook();
+    Sbus_hook();
   }
 }
 
@@ -106,6 +106,6 @@ void UART7_IRQHandler(void) {
     return;
   }
   if (huart7.Instance->SR & UART_FLAG_IDLE) {
-    ops_hook();
+    Ops_hook();
   }
 }

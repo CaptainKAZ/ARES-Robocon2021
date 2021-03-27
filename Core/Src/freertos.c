@@ -60,7 +60,7 @@ osThreadId_t QuickTestTaskHandle;
 const osThreadAttr_t QuickTestTask_attributes = {
   .name = "QuickTestTask",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 512 * 4
+  .stack_size = 256 * 4
 };
 /* Definitions for INSTask */
 osThreadId_t INSTaskHandle;
@@ -83,6 +83,13 @@ const osThreadAttr_t LEDMonitorTask_attributes = {
   .priority = (osPriority_t) osPriorityLow,
   .stack_size = 128 * 4
 };
+/* Definitions for ChassisTask */
+osThreadId_t ChassisTaskHandle;
+const osThreadAttr_t ChassisTask_attributes = {
+  .name = "ChassisTask",
+  .priority = (osPriority_t) osPriorityRealtime3,
+  .stack_size = 512 * 4
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -94,6 +101,7 @@ void quick_test_task(void *argument);
 void INS_task(void *argument);
 void feedback_task(void *argument);
 void led_monitor_task(void *argument);
+void chassis_task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -168,6 +176,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of LEDMonitorTask */
   LEDMonitorTaskHandle = osThreadNew(led_monitor_task, NULL, &LEDMonitorTask_attributes);
+
+  /* creation of ChassisTask */
+  ChassisTaskHandle = osThreadNew(chassis_task, NULL, &ChassisTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -263,6 +274,24 @@ __weak void led_monitor_task(void *argument)
     osDelay(1);
   }
   /* USER CODE END led_monitor_task */
+}
+
+/* USER CODE BEGIN Header_chassis_task */
+/**
+* @brief Function implementing the ChassisTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_chassis_task */
+__weak void chassis_task(void *argument)
+{
+  /* USER CODE BEGIN chassis_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END chassis_task */
 }
 
 /* Private application code --------------------------------------------------*/

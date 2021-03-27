@@ -20,9 +20,6 @@
 #include "main.h"
 #include "usart.h"
 
-#define OPS_RXBUF_SIZE 56u
-#define OPS_FRAME_LENGTH 28u
-
 typedef struct {
   fp32 yaw;
   fp32 pitch;
@@ -30,9 +27,11 @@ typedef struct {
   fp32 x;
   fp32 y;
   fp32 w;
-} OPSData;
+} Ops;
 
-extern void ops_init(void);
-extern void ops_hook(void);
+extern Ops  ops;
+
+extern void Ops_init(void);
+extern void Ops_hook(void);
 
 #endif

@@ -37,7 +37,7 @@ void PID_Clear(PID_Controller *self) {
   self->out[1] = self->out[0] = 0;
   self->DInt                  = 0;
   PID->dt                     = 0;
-  stopwatch_disable(&self->stopwatch);
+  Stopwatch_disable(&self->stopwatch);
 }
 
 fp32 PID_ControllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) {
@@ -64,13 +64,13 @@ fp32 PID_ControllerUpdate(Controller *self, fp32 *set, fp32 *ref, fp32 *out) {
   PID->Ierr[1] = PID->Ierr[0];
   PID->Ierr[0] = PID_Ierr(self);
 
-  PID->dt = stopwatch_disable(&(PID->stopwatch));
+  PID->dt = Stopwatch_disable(&(PID->stopwatch));
   if (PID->dt > PID->timeout || PID->dt == 0) {
     PID_Clear(PID);
-    tic(&(PID->stopwatch));
+    Stopwatch_tic(&(PID->stopwatch));
     return 0;
   }
-  tic(&(PID->stopwatch));
+  Stopwatch_tic(&(PID->stopwatch));
 
   switch (self->type) {
   case PIDPOS_CONTROLLER:
@@ -133,6 +133,6 @@ void PID_ControllerInit(PID_Controller *self, ControllerConstrain *constrain, PI
   self->general.param     = (ControllerParam *)param;
   self->general.I_size = self->general.O_size = 1;
   self->timeout                               = timeout;
-  stopwatch_register(&self->stopwatch);
+  Stopwatch_register(&self->stopwatch);
   PID_Clear(self);
 }

@@ -16,9 +16,9 @@
   * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
   */
 #include "motor.h"
-#include "VESC_motor.h"
-#include "RM_motor.h"
-#include "RMD_motor.h"
+#include "vesc_motor.h"
+#include "rm_motor.h"
+#include "rmd_motor.h"
 
 extern void RM_Motor_SetSpeedPID(Motor *self, PID_ControllerParam *param);
 extern void RMD_Motor_SetSpeedPID(Motor *self, PID_ControllerParam *param);

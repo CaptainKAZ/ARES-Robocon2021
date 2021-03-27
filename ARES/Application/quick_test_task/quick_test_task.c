@@ -30,7 +30,7 @@ Motor *         test_motor[2];
 
 PID_ControllerParam        whip_speed_pidparam = {.general  = PIDPOS_CONTROLLER,
                                            .Int_type = BACK_CALCULATION_INT,
-                                           .kP       = 18.0f,
+                                           .kP       = 19.0f,
                                            .kI       = 0.0f,
                                            .kD       = 0.0f,
                                            .kB       = 0.03f,
@@ -59,7 +59,7 @@ quintic_traj whip_traj;
 static fp32       ag;
 MotorInstructType doubleMotorCtrl0(Motor *motor, Controller *controller) {
   ag       = (2 * PI * motor->status.cumulative_turn + motor->status.angle - motor->status.zero) / M3508_REDUCTION_RATIO;
-  fp32 rpm = M3508_REDUCTION_RATIO* 1000*9.5492965855137201461330258023509*set_rads + controllerUpdate(controller, &set_angle, &ag, NULL);
+  fp32 rpm = M3508_REDUCTION_RATIO* 1000*9.5492965855137201461330258023509f*set_rads + controllerUpdate(controller, &set_angle, &ag, NULL);
   ((RM_Motor *)motor)->set_current =
       controllerUpdate((Controller *)&((RM_Motor *)motor)->speed_pid, &rpm, &motor->status.speed, NULL);
   return INSTRUCT_CURRENT;
@@ -73,17 +73,20 @@ MotorInstructType doubleMotorCtrl1(Motor *motor, Controller *controller) {
 void quick_test_task() {
   vTaskDelay(200);
 
-  quinticTraj_init(&whip_traj, DEG2RAD(-20.0f), 0, 0, DEG2RAD(-150.0f), 0, 0, 600.0);
-  while (test_motor[0] == NULL || test_motor[1] == NULL) {
+  quinticTraj_init(&whip_traj, DEG2RAD(-30.0f), -0.002, -0.0001, DEG2RAD(-200.0f), 0, 0, 500.0);
+  while (test_motor[0] == NULL|| test_motor[1] == NULL) {
     test_motor[0] = CAN_Find_Motor(RM_MOTOR, INTERNAL_CAN1, 0);
     test_motor[1] = CAN_Find_Motor(RM_MOTOR, INTERNAL_CAN1, 1);
     vTaskDelay(100);
   }
+
   feedback_register(&ag, 4);
-  feedback_register(&test_motor[0]->status.speed, 5);
-  feedback_register(&((RM_Motor *)test_motor[0])->speed_pid.out[0], 6);
-  feedback_register(&set_angle, 7);
-  feedback_register(&setrpm,8);
+  feedback_register(&set_angle, 5);
+  feedback_register(&test_motor[0]->status.speed, 6);
+  feedback_register(&setrpm, 7);
+  feedback_register(&((RM_Motor *)test_motor[0])->speed_pid.out[0], 8);
+  feedback_register(&test_motor[0]->status.current, 9);
+
   PID_ControllerInit(&whip_angle_pid, &whip_angle_constrain, &whip_angle_pid_param, 10);
 
   Motor_SetAltController(test_motor[0], (Controller *)&whip_angle_pid, doubleMotorCtrl0);
@@ -92,6 +95,7 @@ void quick_test_task() {
   static fp32 temp_kp;
   temp_kp = whip_speed_pidparam.kP;
   for (;;) {
+    if(SBUS_CHANNEL[9]>0.8f){Motor_SetSpeed(test_motor[0],setrpm,2);}else{Motor_SetSpeed(test_motor[0],100,2);}
     last_wake = xTaskGetTickCount();
     if (zeroed) {
       if (SBUS_CHANNEL[9] > 0.8f && timebase <= 0) {
@@ -129,7 +133,7 @@ void quick_test_task() {
         whip_speed_pidparam.kP = temp_kp;
       }
     }
-    setrpm= M3508_REDUCTION_RATIO*  1000*9.5492965855137201461330258023509f*set_rads;
+    setrpm= M3508_REDUCTION_RATIO*  1000.0f*9.5492965855137201461330258023509f*set_rads;
     vTaskDelayUntil(&last_wake, 1);
   }
 }
