@@ -20,18 +20,23 @@
 #include "main.h"
 #include "usart.h"
 
+//OPS超时时间
+#define OPS_MONITOR_TIMEOUT 10
+
 typedef struct {
-  fp32 yaw;
-  fp32 pitch;
-  fp32 roll;
-  fp32 x;
-  fp32 y;
-  fp32 w;
+  fp32     yaw;   //单位°
+  fp32     pitch; //单位°
+  fp32     roll;  //单位°
+  fp32     x;     //单位mm
+  fp32     y;     //单位mm
+  fp32     w;     //单位dps
+  uint32_t updateTime;
 } Ops;
 
-extern Ops  ops;
+extern Ops ops;
 
 extern void Ops_init(void);
 extern void Ops_hook(void);
+extern void Ops_reset(void);
 
 #endif

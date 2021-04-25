@@ -29,8 +29,15 @@ typedef enum {
   ENCODER_ZERO              = 0x06, //设置当前位置为编码器原点
 } CAN_ENDCODER_COMMAND;
 
+typedef struct{
+  int32_t value;
+  int32_t updateTime;
+} CanEncoder;
+
 #define ENCODER_BROADCAST_ID 0x00
 #define ENCODER_MASTER_ID 0x01
+
+extern CanEncoder canEncoder[2][4];
 
 extern void Encoder_setFeedbackTime(CAN_Device device, uint8_t id, uint16_t ms);
 extern void Encoder_readValue(CAN_Device device, uint8_t id);

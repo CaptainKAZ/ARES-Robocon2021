@@ -155,8 +155,9 @@ void VESC_Motor_SetAngle(Motor *self, fp32 rad, uint32_t timeout) {
   xSemaphoreGive(VESC_Motor_Mutex);
 }
 
-void VESC_Motor_SetAltController(Motor *self, Controller *alt_controller,
-                                 MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller)) {
+void VESC_Motor_SetAltController(Motor *self, Controller *alt_controller, void *param,
+                                 MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller,
+                                                                            void *param)) {
   if (VESC_Motor_Mutex == NULL) {
     VESC_Motor_Mutex = xSemaphoreCreateMutexStatic(&VESC_Motor_MutexBuffer);
   }
@@ -166,6 +167,7 @@ void VESC_Motor_SetAltController(Motor *self, Controller *alt_controller,
   xSemaphoreTake(VESC_Motor_Mutex, portMAX_DELAY);
   MOTOR->alt_controller        = alt_controller;
   MOTOR->alt_controller_update = alt_controller_update;
+  MOTOR->alt_controller_param  = param;
   xSemaphoreGive(VESC_Motor_Mutex);
 }
 
@@ -222,7 +224,8 @@ void VESC_Motor_Execute(void) {
                              vesc_motor[i].general.info.id | ((uint32_t)CAN_PACKET_SET_POS << 8), buffer, send_index);
           break;
         case INSTRUCT_ALTERNATIVE:
-          alt_instruct = vesc_motor[i].general.alt_controller_update((Motor*)&vesc_motor[i], vesc_motor->general.alt_controller);
+          alt_instruct = vesc_motor[i].general.alt_controller_update(
+              (Motor *)&vesc_motor[i], vesc_motor->general.alt_controller, vesc_motor[i].general.alt_controller_param);
           switch (alt_instruct) {
           case INSTRUCT_CURRENT:
             if (vesc_motor[i].general.instruct.set != 0)

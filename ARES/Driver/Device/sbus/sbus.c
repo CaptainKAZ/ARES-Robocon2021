@@ -19,6 +19,8 @@
 #include "sbus.h"
 #include "usart.h"
 #include "cmsis_os.h"
+#include "monitor_task.h"
+#include <string.h>
 
 #define SBUS_RXBUF_SIZE 50u
 #define SBUS_FRAME_LENGTH 25u
@@ -27,7 +29,10 @@
 #define SBUS_VALUE_OFFSET ((fp32)1024)
 
 Sbus           sbus;
-static uint8_t sbusRxBuf[2][SBUS_RXBUF_SIZE];
+static volatile uint8_t sbusRxBuf[2][SBUS_RXBUF_SIZE];
+MonitorList             SbusMonitor;
+
+void Sbus_guard(uint32_t *errorReg, uint32_t *errorTime);
 
 void Sbus_init(void) {
   //停止DMA接收
@@ -54,8 +59,15 @@ void Sbus_init(void) {
   SET_BIT(huart1.Instance->CR3, USART_CR3_DMAR);
   //使能串口空闲中断
   __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+
+  Monitor_registor(&SbusMonitor, Sbus_guard, MONITOR_SBUS_ID);
 }
 
+/**
+  * @brief    遥控器协议解析
+  * 
+  * @param    sbusBuf   原始数据缓冲区
+  */
 static void parseSbus(volatile const uint8_t *sbusBuf) {
   sbus.channel[0] = (((sbusBuf[1] | (sbusBuf[2] << 8)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
   sbus.channel[1] = ((((sbusBuf[2] >> 3) | (sbusBuf[3] << 5)) & 0x07ff) - SBUS_VALUE_OFFSET) / SBUS_VALUE_MAX;
@@ -78,24 +90,67 @@ static void parseSbus(volatile const uint8_t *sbusBuf) {
   * 
   */
 void Sbus_hook(void) {
-  static uint16_t this_time_rx_len = 0;
+  static uint16_t rxLen = 0;
 
   __HAL_UART_CLEAR_PEFLAG(&huart1);
   __HAL_DMA_DISABLE(&hdma_usart1_rx);
-  this_time_rx_len              = SBUS_RXBUF_SIZE - hdma_usart1_rx.Instance->NDTR;
+  rxLen              = SBUS_RXBUF_SIZE - hdma_usart1_rx.Instance->NDTR;
   hdma_usart1_rx.Instance->NDTR = SBUS_RXBUF_SIZE;
 
   if ((hdma_usart1_rx.Instance->CR & DMA_SxCR_CT) == RESET) {
     hdma_usart1_rx.Instance->CR |= DMA_SxCR_CT;
     __HAL_DMA_ENABLE(&hdma_usart1_rx);
-    if (this_time_rx_len == SBUS_FRAME_LENGTH) {
-      parse_sbus(sbusRxBuf[0]);
+    if (rxLen == SBUS_FRAME_LENGTH) {
+      parseSbus(sbusRxBuf[0]);
     }
   } else {
     hdma_usart1_rx.Instance->CR &= ~(DMA_SxCR_CT);
     __HAL_DMA_ENABLE(&hdma_usart1_rx);
-    if (this_time_rx_len == SBUS_FRAME_LENGTH) {
-      parse_sbus(sbusRxBuf[1]);
+    if (rxLen == SBUS_FRAME_LENGTH) {
+      parseSbus(sbusRxBuf[1]);
     }
+  }
+}
+
+/**
+  * @brief    SBUS串口和DMA重启
+  * 
+  */
+void Sbus_restrat(void) {
+  __HAL_UART_DISABLE(&huart1);
+  __HAL_DMA_DISABLE(&hdma_usart1_rx);
+
+  hdma_usart1_rx.Instance->NDTR = SBUS_RXBUF_SIZE;
+  __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_RXNE);
+  __HAL_DMA_CLEAR_FLAG(&hdma_usart1_rx, DMA_FLAG_TCIF2_6);
+
+  __HAL_DMA_ENABLE(&hdma_usart1_rx);
+  __HAL_UART_ENABLE(&huart1);
+}
+
+/**
+  * @brief    SBUS守护函数
+  * 
+  * @param    errorReg  错误寄存器
+  * @param    errorTime 错误时间
+  */
+void Sbus_guard(uint32_t *errorReg, uint32_t *errorTime) {
+  *errorReg  = 0;
+  *errorTime = 0;
+  if (xTaskGetTickCount() - sbus.updateTime > SBUS_MONITOR_TIMEOUT) {
+    SET_BIT(*errorReg, MONITOR_ERROR_EXIST);
+    SET_BIT(*errorReg, MONITOR_ERROR_LOST);
+    Sbus_restrat();
+  }
+  for (uint8_t i = 0; i < 10;i++){
+    if(__fabs(sbus.channel[i])>1.0f) {
+      SET_BIT(*errorReg, MONITOR_ERROR_EXIST);
+      SET_BIT(*errorReg, MONITOR_ERROR_INVALID);
+      memset(&sbus, 0, sizeof(sbus));
+      break;
+    }
+  }
+  if(errorReg){
+    *errorTime = xTaskGetTickCount();
   }
 }

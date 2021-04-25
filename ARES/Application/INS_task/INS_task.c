@@ -16,7 +16,7 @@
   * ****************************(C) COPYRIGHT 2020 ARES@SUSTech****************************
   */
 #include "main.h"
-#include "INS_task.h"
+#include "ins_task.h"
 #include "cmsis_os.h"
 #include "spi.h"
 #include "imu.h"
@@ -131,13 +131,13 @@ uint8_t save_cal_data(imu_cal_t *data) {
   return Flash_Save((uint8_t*)data, sizeof(imu_cal_t));
 }
 
-void INS_task(void *pvParameters) {
+void ins_task(void *pvParameters) {
   //延迟等待系统稳定
   vTaskDelay(MOTIONFX_INIT_TIME);
-  feedback_register(&motionFX_output.quaternion_9X[0], 0);
-  feedback_register(&motionFX_output.quaternion_9X[1], 1);
-  feedback_register(&motionFX_output.quaternion_9X[2], 2);
-  feedback_register(&motionFX_output.quaternion_9X[3], 3);
+  feedback_register(&motionFX_output.quaternion_9X[0], FEEDBACK_MFX_QUART_1);
+  feedback_register(&motionFX_output.quaternion_9X[1], FEEDBACK_MFX_QUART_2);
+  feedback_register(&motionFX_output.quaternion_9X[2], FEEDBACK_MFX_QUART_3);
+  feedback_register(&motionFX_output.quaternion_9X[3], FEEDBACK_MFX_QUART_4);
   //初始化MPU6500
   while (mpu_init() != MPU6500_NO_ERROR) {
     ;

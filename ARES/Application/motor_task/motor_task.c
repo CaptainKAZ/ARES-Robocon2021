@@ -17,7 +17,7 @@
   */
 #include "motor_task.h"
 
-extern void RM_Motor_Execute(void);
+extern void RM_Motor_execute(void);
 extern void VESC_Motor_Execute(void);
 extern void RMD_Motor_Execute(void);
 
@@ -27,7 +27,7 @@ void motor_task(void *pvParameters) {
   vTaskDelay(MOTOR_INIT_TIME);
   while (1) {
     xLastWakeTime = xTaskGetTickCount();
-    RM_Motor_Execute();
+    RM_Motor_execute();
     VESC_Motor_Execute();
     RMD_Motor_Execute();
     vTaskDelayUntil(&xLastWakeTime, MOTOR_CTRL_TIME); //使用vTaskDelayUntil()保证精确延迟

@@ -23,6 +23,8 @@
 #include "encoder.h"
 #include "gpio.h"
 #include "can.h"
+#include "mcp2515.h"
+#include "monitor_task.h"
 
 void User_Init(void) {
   FLOWLED_OFF(0);
@@ -46,10 +48,17 @@ void User_Init(void) {
   HAL_GPIO_WritePin(PWR3_GPIO_Port, PWR3_Pin, GPIO_PIN_SET);
   CAN_Start(INTERNAL_CAN1);
   CAN_Start(INTERNAL_CAN2);
+  CAN_Start(EXTERNAL_MCP2515);
   HAL_Delay(5);
-  Encoder_setMode(INTERNAL_CAN1, ENCODER_BROADCAST_ID, 0xAA);
-  Encoder_setMode(INTERNAL_CAN2, ENCODER_BROADCAST_ID, 0xAA);
   HAL_Delay(5);
-  Encoder_setFeedbackTime(INTERNAL_CAN1, ENCODER_BROADCAST_ID, 50);
-  Encoder_setFeedbackTime(INTERNAL_CAN2, ENCODER_BROADCAST_ID, 50);
+  for (uint16_t i = 0; i < 20; i++) {
+    Encoder_setMode(INTERNAL_CAN1, 0x02, 0xAA);
+    Encoder_setMode(INTERNAL_CAN2, 0x02, 0xAA);
+    Encoder_setMode(INTERNAL_CAN1, 0x03, 0xAA);
+    Encoder_setMode(INTERNAL_CAN2, 0x03, 0xAA);
+    Encoder_setFeedbackTime(INTERNAL_CAN1, 0x02, 1000);
+    Encoder_setFeedbackTime(INTERNAL_CAN2, 0x02, 1000);
+    Encoder_setFeedbackTime(INTERNAL_CAN1, 0x03, 1000);
+    Encoder_setFeedbackTime(INTERNAL_CAN2, 0x03, 1000);
+  }
 }

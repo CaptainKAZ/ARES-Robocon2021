@@ -25,6 +25,9 @@
 #include "can_comm.h"
 #include "tim.h"
 #include "ops.h"
+#include "mcp2515.h"
+#include "computer_task.h"
+
 
 /**
   * @brief    TIM6中断服务程序，负责计时器更新
@@ -45,13 +48,18 @@ void TIM6_DAC_IRQHandler(void) { if (__HAL_TIM_GET_FLAG(&htim6, TIM_FLAG_UPDATE)
   * 
   */
 void USART1_IRQHandler(void) {
+  if (huart1.Instance->SR & UART_FLAG_RXNE) {
+    __HAL_UART_CLEAR_PEFLAG(&huart1);
+    __HAL_UART_FLUSH_DRREGISTER(&huart1);
+    return;
+  }
   if (huart1.Instance->SR & UART_FLAG_IDLE) {
     Sbus_hook();
   }
 }
 
 /**
-  * @brief    GPIO外部中断，主要由MPU6050引发
+  * @brief    GPIO外部中断，由MPU6050\MCP2515引发
   * 
   * @param    GPIO_Pin  
   */
@@ -61,6 +69,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
       MPU_NSS_L();
       imu_DMA_read();
     }
+  }else if(GPIO_Pin==MCP_INT_Pin){
+    Mcp2515_rxHook();
   }
 }
 
@@ -73,7 +83,7 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
   if (hspi->Instance == SPI5) {
     MPU_NSS_H();
     HAL_SPI_DMAStop(hspi);
-    //唤醒任务
+    //唤醒ins任务
      if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
        static BaseType_t xHigherPriorityTaskWoken;
        vTaskNotifyGiveFromISR(INS_task_handle, &xHigherPriorityTaskWoken);
@@ -99,6 +109,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
   CAN_RxHook(&frame);
 }
 
+/**
+  * @brief    UART7中断，OPS接收
+  * 
+  */
 void UART7_IRQHandler(void) {
   if(huart7.Instance->SR & UART_FLAG_RXNE){
     __HAL_UART_CLEAR_PEFLAG(&huart7);
@@ -107,5 +121,21 @@ void UART7_IRQHandler(void) {
   }
   if (huart7.Instance->SR & UART_FLAG_IDLE) {
     Ops_hook();
+  }
+}
+
+/**
+  * @brief    USART3中断，上位机接收
+  * 
+  */
+void USART6_IRQHandler(void) {
+  
+  if (huart6.Instance->SR & UART_FLAG_IDLE) {
+    Computer_hook();
+  }else{
+    HAL_UART_IRQHandler(&huart6);
+    __HAL_UART_CLEAR_PEFLAG(&huart6);
+    __HAL_UART_FLUSH_DRREGISTER(&huart6);
+    __HAL_UART_CLEAR_FLAG(&huart6,UART_FLAG_TC);
   }
 }

@@ -23,6 +23,7 @@
 typedef enum {
   INTERNAL_CAN1=0,
   INTERNAL_CAN2,
+  EXTERNAL_MCP2515,
 } CAN_Device;
 
 typedef enum {

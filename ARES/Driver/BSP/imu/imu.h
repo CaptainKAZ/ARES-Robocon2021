@@ -3,8 +3,6 @@
 #include "main.h"
 #define MPU6500
 
-#define GYRO_OFFSET_KP 0.0003f //调整这个可以调整陀螺仪校准速度，越大陀螺仪校准变化越快，但波动会变大
-
 #define MPU_DATA_READY_BIT 0 //陀螺仪数据准备
 #define MPU_MOT_BIT 1        //mpu6500 运动检测
 #define IST8310_DATA_READY_BIT 2

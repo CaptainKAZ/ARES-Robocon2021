@@ -41,7 +41,13 @@
       "led_monitor_task.h": "c",
       "rm_motor.h": "c",
       "quintic_trajectory.h": "c",
-      "arm_math.h": "c"
+      "arm_math.h": "c",
+      "monitor_task.h": "c",
+      "imu.h": "c",
+      "mcp2515_reg.h": "c",
+      "cmsis_armcc.h": "c",
+      "quick_test_task.h": "c",
+      "motor.h": "c"
     },
 	},
 	"extensions": {

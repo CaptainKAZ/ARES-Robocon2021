@@ -48,47 +48,54 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for MotorTask */
-osThreadId_t MotorTaskHandle;
-const osThreadAttr_t MotorTask_attributes = {
-  .name = "MotorTask",
+/* Definitions for Motor */
+osThreadId_t MotorHandle;
+const osThreadAttr_t Motor_attributes = {
+  .name = "Motor",
   .priority = (osPriority_t) osPriorityRealtime,
   .stack_size = 256 * 4
 };
-/* Definitions for QuickTestTask */
-osThreadId_t QuickTestTaskHandle;
-const osThreadAttr_t QuickTestTask_attributes = {
-  .name = "QuickTestTask",
+/* Definitions for QuickTest */
+osThreadId_t QuickTestHandle;
+const osThreadAttr_t QuickTest_attributes = {
+  .name = "QuickTest",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 256 * 4
+  .stack_size = 512 * 4
 };
-/* Definitions for INSTask */
-osThreadId_t INSTaskHandle;
-const osThreadAttr_t INSTask_attributes = {
-  .name = "INSTask",
+/* Definitions for INS */
+osThreadId_t INSHandle;
+const osThreadAttr_t INS_attributes = {
+  .name = "INS",
   .priority = (osPriority_t) osPriorityRealtime,
   .stack_size = 1024 * 4
 };
-/* Definitions for FeedbackTask */
-osThreadId_t FeedbackTaskHandle;
-const osThreadAttr_t FeedbackTask_attributes = {
-  .name = "FeedbackTask",
+/* Definitions for Feedback */
+osThreadId_t FeedbackHandle;
+const osThreadAttr_t Feedback_attributes = {
+  .name = "Feedback",
   .priority = (osPriority_t) osPriorityBelowNormal,
   .stack_size = 128 * 4
 };
-/* Definitions for LEDMonitorTask */
-osThreadId_t LEDMonitorTaskHandle;
-const osThreadAttr_t LEDMonitorTask_attributes = {
-  .name = "LEDMonitorTask",
+/* Definitions for Monitor */
+osThreadId_t MonitorHandle;
+const osThreadAttr_t Monitor_attributes = {
+  .name = "Monitor",
   .priority = (osPriority_t) osPriorityLow,
   .stack_size = 128 * 4
 };
-/* Definitions for ChassisTask */
-osThreadId_t ChassisTaskHandle;
-const osThreadAttr_t ChassisTask_attributes = {
-  .name = "ChassisTask",
+/* Definitions for Chassis */
+osThreadId_t ChassisHandle;
+const osThreadAttr_t Chassis_attributes = {
+  .name = "Chassis",
   .priority = (osPriority_t) osPriorityRealtime3,
   .stack_size = 512 * 4
+};
+/* Definitions for Computer */
+osThreadId_t ComputerHandle;
+const osThreadAttr_t Computer_attributes = {
+  .name = "Computer",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 256 * 4
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -98,10 +105,11 @@ const osThreadAttr_t ChassisTask_attributes = {
 
 void motor_task(void *argument);
 void quick_test_task(void *argument);
-void INS_task(void *argument);
+void ins_task(void *argument);
 void feedback_task(void *argument);
-void led_monitor_task(void *argument);
+void monitor_task(void *argument);
 void chassis_task(void *argument);
+void computer_task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -162,23 +170,26 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of MotorTask */
-  MotorTaskHandle = osThreadNew(motor_task, NULL, &MotorTask_attributes);
+  /* creation of Motor */
+  MotorHandle = osThreadNew(motor_task, NULL, &Motor_attributes);
 
-  /* creation of QuickTestTask */
-  QuickTestTaskHandle = osThreadNew(quick_test_task, NULL, &QuickTestTask_attributes);
+  /* creation of QuickTest */
+  QuickTestHandle = osThreadNew(quick_test_task, NULL, &QuickTest_attributes);
 
-  /* creation of INSTask */
-  INSTaskHandle = osThreadNew(INS_task, NULL, &INSTask_attributes);
+  /* creation of INS */
+  INSHandle = osThreadNew(ins_task, NULL, &INS_attributes);
 
-  /* creation of FeedbackTask */
-  FeedbackTaskHandle = osThreadNew(feedback_task, NULL, &FeedbackTask_attributes);
+  /* creation of Feedback */
+  FeedbackHandle = osThreadNew(feedback_task, NULL, &Feedback_attributes);
 
-  /* creation of LEDMonitorTask */
-  LEDMonitorTaskHandle = osThreadNew(led_monitor_task, NULL, &LEDMonitorTask_attributes);
+  /* creation of Monitor */
+  MonitorHandle = osThreadNew(monitor_task, NULL, &Monitor_attributes);
 
-  /* creation of ChassisTask */
-  ChassisTaskHandle = osThreadNew(chassis_task, NULL, &ChassisTask_attributes);
+  /* creation of Chassis */
+  ChassisHandle = osThreadNew(chassis_task, NULL, &Chassis_attributes);
+
+  /* creation of Computer */
+  ComputerHandle = osThreadNew(computer_task, NULL, &Computer_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -222,22 +233,22 @@ __weak void quick_test_task(void *argument)
   /* USER CODE END quick_test_task */
 }
 
-/* USER CODE BEGIN Header_INS_task */
+/* USER CODE BEGIN Header_ins_task */
 /**
-* @brief Function implementing the INSTask thread.
+* @brief Function implementing the INS thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_INS_task */
-__weak void INS_task(void *argument)
+/* USER CODE END Header_ins_task */
+__weak void ins_task(void *argument)
 {
-  /* USER CODE BEGIN INS_task */
+  /* USER CODE BEGIN ins_task */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END INS_task */
+  /* USER CODE END ins_task */
 }
 
 /* USER CODE BEGIN Header_feedback_task */
@@ -258,22 +269,22 @@ __weak void feedback_task(void *argument)
   /* USER CODE END feedback_task */
 }
 
-/* USER CODE BEGIN Header_led_monitor_task */
+/* USER CODE BEGIN Header_monitor_task */
 /**
-* @brief Function implementing the LEDMonitorTask thread.
+* @brief Function implementing the Monitor thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_led_monitor_task */
-__weak void led_monitor_task(void *argument)
+/* USER CODE END Header_monitor_task */
+__weak void monitor_task(void *argument)
 {
-  /* USER CODE BEGIN led_monitor_task */
+  /* USER CODE BEGIN monitor_task */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END led_monitor_task */
+  /* USER CODE END monitor_task */
 }
 
 /* USER CODE BEGIN Header_chassis_task */
@@ -292,6 +303,24 @@ __weak void chassis_task(void *argument)
     osDelay(1);
   }
   /* USER CODE END chassis_task */
+}
+
+/* USER CODE BEGIN Header_computer_task */
+/**
+* @brief Function implementing the Computer thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_computer_task */
+__weak void computer_task(void *argument)
+{
+  /* USER CODE BEGIN computer_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END computer_task */
 }
 
 /* Private application code --------------------------------------------------*/

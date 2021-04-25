@@ -22,6 +22,15 @@
 
 #define FEEDBACK_CHANNEL_NUM 10
 
+//在此定义反馈变量通道
+#define FEEDBACK_MFX_QUART_1 0
+#define FEEDBACK_MFX_QUART_2 1
+#define FEEDBACK_MFX_QUART_3 2
+#define FEEDBACK_MFX_QUART_4 3
+#define FEEDBACK_STEER_ANGLE 4
+#define FEEDBACK_STEER_TARGET 5
+#define FEEDBACK_DRIVE_TARGET 6
+#define FEEDBACK_DRIVE_SPEED  7
 extern uint8_t feedback_register(fp32 *ptr, uint8_t channel);
 
 #endif

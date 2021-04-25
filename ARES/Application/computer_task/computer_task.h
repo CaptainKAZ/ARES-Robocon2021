@@ -7,21 +7,29 @@
   *                             /_/  |_|/_/ |_|/_____/ /____/ 
   *                        Association of Robotics Engineers at SUSTech
   * 
-  * @file     led_monitor_task.h
+  * @file     computer_task.h
   * @author   Zou Yuanhao (11810102@mail.sustech.edu.cn)
-  * @brief    LED灯语任务
+  * @brief    上位机控制任务
   * @version  0.1
-  * @date     2021-03-14
+  * @date     2021-04-18
   * 
   * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
   */
-#ifndef LED_MONITOR_TASK_H
-#define LED_MONITOR_TASK_H
+#ifndef COMPUTER_TASK_H
+#define COMPUTER_TASK_H
 #include "main.h"
-#include "gpio.h"
-#include "cmsis_os.h"
-#include "cpu_utils.h"
 
+typedef struct {
+  fp32 vx;
+  fp32 vy;
+  fp32 wz;
+} ComputerInstruct;
 
+typedef struct {
+  ComputerInstruct instruct;
+  uint32_t updateTime;
+} ComputerRxMsg;
 
+extern void Computer_hook(void);
+extern ComputerRxMsg computerRxMsg;
 #endif

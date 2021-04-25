@@ -19,6 +19,18 @@
 #define SBUS_H
 
 #include "main.h"
+#define SBUS_MONITOR_TIMEOUT 20
+
+#define SBUS_LX_CHANNEL 3
+#define SBUS_LY_CHANNEL 1
+#define SBUS_RX_CHANNEL 0
+#define SBUS_RY_CHANNEL 2
+#define SBUS_V1_CHANNEL 4
+#define SBUS_V2_CHANNEL 5
+#define SBUS_SA_CHANNEL 6
+#define SBUS_SB_CHANNEL 7
+#define SBUS_SC_CHANNEL 8
+#define SBUS_SD_CHANNEL 9
 
 typedef struct {
   fp32 channel[10];

@@ -16,8 +16,9 @@
   * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
   */
 #include "encoder.h"
+#include "cmsis_os.h"
 
-int32_t ENCODER_VALUE[4];
+CanEncoder canEncoder[2][4];
 
 void Encoder_setFeedbackTime(CAN_Device device, uint8_t id, uint16_t ms) {
   uint8_t   data[5];
@@ -84,7 +85,8 @@ void Encoder_RxHook(CAN_Frame *frame) {
   if (frame->data[2] == 0x01) {
     switch (frame->data[1]) {
     case 2 ... 5:
-      ENCODER_VALUE[frame->data[1] - 2] = frame->data[3] | frame->data[4] << 8 | frame->data[5] << 16 | frame->data[6] << 24;
+      canEncoder[frame->device][frame->data[1] - 2].value = frame->data[3] | frame->data[4] << 8 | frame->data[5] << 16 | frame->data[6] << 24;
+      canEncoder[frame->device][frame->data[1] - 2].updateTime = xTaskGetTickCount();
       break;
     }
   }

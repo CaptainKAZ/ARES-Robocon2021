@@ -54,7 +54,7 @@ typedef struct {
 typedef struct {
   fp32    current;
   fp32    speed;
-  fp32    angle;
+  fp32    angle; //弧度制
   fp32    temperature;
   fp32    zero;
   int32_t cumulative_turn;
@@ -65,7 +65,8 @@ typedef struct Motor {
   MotorStatus   status;
   MotorInstruct instruct;
   Controller *  alt_controller;
-  MotorInstructType (*alt_controller_update)(struct Motor *motor, Controller *controller);
+  void *        alt_controller_param;
+  MotorInstructType (*alt_controller_update)(struct Motor *motor, Controller *controller, void *param);
 } Motor;
 
 extern void Motor_SetSpeedPID(Motor *self, PID_ControllerParam *param);
@@ -74,8 +75,9 @@ extern void Motor_Zero(Motor *self);
 extern void Motor_SetCurrent(Motor *self, fp32 mA, uint32_t timeout);
 extern void Motor_SetSpeed(Motor *self, fp32 rpm, uint32_t timeout);
 extern void Motor_SetAngle(Motor *self, fp32 rad, uint32_t timeout);
-extern void Motor_SetAltController(Motor *self, Controller *alt_controller,
-                                   MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller));
+extern void Motor_SetAltController(Motor *self, Controller *alt_controller, void *param,
+                                   MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller,
+                                                                              void *param));
 extern void Motor_AltControl(Motor *self, uint32_t timeout);
 Motor *     CAN_Find_Motor(MotorType type, CAN_Device device, uint8_t id);
 

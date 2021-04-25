@@ -32,8 +32,8 @@ static PID_ControllerParam RMD_default_speed_pid_param   = {.general.type = PIDP
                                                           .kD           = 0,
                                                           .max_Iout     = 16000.0f,
                                                           .N            = 50};
-static fp32                RMD_default_speed_O_Hlim      = 16384.0f;
-static fp32                RMD_default_speed_O_Llim      = -16384.0f;
+static fp32                RMD_default_speed_O_Hlim      = 2000.0f;
+static fp32                RMD_default_speed_O_Llim      = -2000.0f;
 static fp32                RMD_default_speed_I_loop_Llim = 0;
 static fp32                RMD_default_speed_I_loop_Hlim = 0;
 static ControllerConstrain RMD_default_speed_constrain   = {.I_loop_Hlim = &RMD_default_speed_I_loop_Hlim,
@@ -178,8 +178,9 @@ void RMD_Motor_SetAngle(Motor *self, fp32 rad, uint32_t timeout) {
   xSemaphoreGive(RMD_Motor_Mutex);
 }
 
-void RMD_Motor_SetAltController(Motor *self, Controller *alt_controller,
-                                MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller)) {
+void RMD_Motor_SetAltController(Motor *self, Controller *alt_controller, void *param,
+                                MotorInstructType (*alt_controller_update)(Motor *motor, Controller *controller,
+                                                                           void *param )) {
   if (RMD_Motor_Mutex == NULL) {
     RMD_Motor_Mutex = xSemaphoreCreateMutexStatic(&RMD_Motor_MutexBuffer);
   }
@@ -189,6 +190,7 @@ void RMD_Motor_SetAltController(Motor *self, Controller *alt_controller,
   xSemaphoreTake(RMD_Motor_Mutex, portMAX_DELAY);
   MOTOR->alt_controller        = alt_controller;
   MOTOR->alt_controller_update = alt_controller_update;
+  MOTOR->alt_controller_param  = param;
   xSemaphoreGive(RMD_Motor_Mutex);
 }
 
@@ -259,7 +261,8 @@ void RMD_Motor_Execute(void) {
                                                            &rmd_motor[i][j].general.status.speed, NULL);
             break;
           case INSTRUCT_ALTERNATIVE:
-            rmd_motor[i][j].general.alt_controller_update((Motor *)&rmd_motor[i][j], rmd_motor[i][j].general.alt_controller);
+            rmd_motor[i][j].general.alt_controller_update((Motor *)&rmd_motor[i][j], rmd_motor[i][j].general.alt_controller,
+                                                          rmd_motor[i][j].general.alt_controller_param);
             break;
           default: break;
           }
@@ -277,12 +280,9 @@ void RMD_Motor_Execute(void) {
     }
   }
   xSemaphoreGive(RMD_Motor_Mutex);
-  if (rmd_motor[0][0].general.instruct.type != INSTRUCT_EASE || rmd_motor[0][1].general.instruct.type != INSTRUCT_EASE ||
-      rmd_motor[0][2].general.instruct.type != INSTRUCT_EASE || rmd_motor[0][3].general.instruct.type != INSTRUCT_EASE)
-    RMD_Motor_Command(rmd_motor[0][0].set_current, rmd_motor[0][1].set_current, rmd_motor[0][2].set_current,
-                      rmd_motor[0][3].set_current, RMD_MULTI_FRAME_HEAD, INTERNAL_CAN1);
-  if (rmd_motor[1][0].general.instruct.type != INSTRUCT_EASE || rmd_motor[1][1].general.instruct.type != INSTRUCT_EASE ||
-      rmd_motor[1][2].general.instruct.type != INSTRUCT_EASE || rmd_motor[1][3].general.instruct.type != INSTRUCT_EASE)
-    RMD_Motor_Command(rmd_motor[1][0].set_current, rmd_motor[1][1].set_current, rmd_motor[1][2].set_current,
-                      rmd_motor[1][3].set_current, RMD_MULTI_FRAME_HEAD, INTERNAL_CAN2);
+ 
+  RMD_Motor_Command(rmd_motor[0][0].set_current, rmd_motor[0][1].set_current, rmd_motor[0][2].set_current,
+                    rmd_motor[0][3].set_current, RMD_MULTI_FRAME_HEAD, INTERNAL_CAN1);
+  RMD_Motor_Command(rmd_motor[1][0].set_current, rmd_motor[1][1].set_current, rmd_motor[1][2].set_current,
+                    rmd_motor[1][3].set_current, RMD_MULTI_FRAME_HEAD, INTERNAL_CAN2);
 }

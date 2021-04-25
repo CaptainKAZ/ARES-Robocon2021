@@ -39,6 +39,8 @@ typedef struct{
   uint8_t imu_calibrated : 1;
 } INS_task_status_t;
 
+extern MFX_output_t motionFX_output;
+
 extern INS_task_status_t INS_task_status;
 
 extern TaskHandle_t INS_task_handle;
