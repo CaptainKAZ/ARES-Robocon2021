@@ -10,7 +10,7 @@
 //#define FILTER_CUTOFF 1000
 
 static Motor *chassisMotor[4];
-static fp32   translationSens = 2000;
+static fp32   translationSens = 10000;
 static fp32   rotationSens    = 2000;
 
 static PID_ControllerParam chassisPid = {.general  = PIDPOS_CONTROLLER,
@@ -18,7 +18,7 @@ static PID_ControllerParam chassisPid = {.general  = PIDPOS_CONTROLLER,
                                          .kB       = 0.2,
                                          .kD       = 0.3,
                                          .kI       = 0.1,
-                                         .kP       = 1.0,
+                                         .kP       = 6.0,
                                          .max_Iout = 16000,
                                          .N        = 25};
 
@@ -49,16 +49,16 @@ void chassis_task1(void *argument) {
   Motor_SetSpeedPID(chassisMotor[3], &chassisPid);
 
   for (;;) {
-    if (sbus.channel[SBUS_SA_CHANNEL] > 0) {
+    if (sbus.real.channel[SBUS_SA_CHANNEL] > 0) {
       if (xTaskGetTickCount() - computerRxMsg.updateTime > 1500) {
-        set[0] = (-0.5f * SQRT2 * translationSens * sbus.channel[2] - 0.5f * SQRT2 * translationSens * sbus.channel[0] +
-                  rotationSens * sbus.channel[3]);
-        set[1] = (0.5f * SQRT2 * translationSens * sbus.channel[2] - 0.5f * SQRT2 * translationSens * sbus.channel[0] +
-                  rotationSens * sbus.channel[3]);
-        set[2] = (0.5f * SQRT2 * translationSens * sbus.channel[2] + 0.5f * SQRT2 * translationSens * sbus.channel[0] +
-                  rotationSens * sbus.channel[3]);
-        set[3] = (-0.5f * SQRT2 * translationSens * sbus.channel[2] + 0.5f * SQRT2 * translationSens * sbus.channel[0] +
-                  rotationSens * sbus.channel[3]);
+        set[0] = (-0.5f * SQRT2 * translationSens * sbus.real.channel[2] - 0.5f * SQRT2 * translationSens * sbus.real.channel[0] +
+                  rotationSens * sbus.real.channel[3]);
+        set[1] = (0.5f * SQRT2 * translationSens * sbus.real.channel[2] - 0.5f * SQRT2 * translationSens * sbus.real.channel[0] +
+                  rotationSens * sbus.real.channel[3]);
+        set[2] = (0.5f * SQRT2 * translationSens * sbus.real.channel[2] + 0.5f * SQRT2 * translationSens * sbus.real.channel[0] +
+                  rotationSens * sbus.real.channel[3]);
+        set[3] = (-0.5f * SQRT2 * translationSens * sbus.real.channel[2] + 0.5f * SQRT2 * translationSens * sbus.real.channel[0] +
+                  rotationSens * sbus.real.channel[3]);
       } else {
         set[0] = (-0.5f * SQRT2 * translationSens * computerRxMsg.instruct.vx -
                   0.5f * SQRT2 * translationSens * computerRxMsg.instruct.vy + rotationSens * computerRxMsg.instruct.wz);
@@ -93,16 +93,16 @@ void chassis_task(void *argument) {
 
 
   for (;;) {
-    if (sbus.channel[SBUS_SA_CHANNEL] > 0) {
+    if (sbus.real.channel[SBUS_SA_CHANNEL] > 0) {
       if (xTaskGetTickCount() - computerRxMsg.updateTime > 1500) {
-        set[0] = (-0.5f * SQRT2 * translationSens * sbus.channel[2] - 0.5f * SQRT2 * translationSens * sbus.channel[0] +
-                  rotationSens * sbus.channel[3]);
-        set[1] = (0.5f * SQRT2 * translationSens * sbus.channel[2] - 0.5f * SQRT2 * translationSens * sbus.channel[0] +
-                  rotationSens * sbus.channel[3]);
-        set[2] = (0.5f * SQRT2 * translationSens * sbus.channel[2] + 0.5f * SQRT2 * translationSens * sbus.channel[0] +
-                  rotationSens * sbus.channel[3]);
-        set[3] = (-0.5f * SQRT2 * translationSens * sbus.channel[2] + 0.5f * SQRT2 * translationSens * sbus.channel[0] +
-                  rotationSens * sbus.channel[3]);
+        set[0] = (-0.5f * SQRT2 * translationSens * sbus.real.channel[2] - 0.5f * SQRT2 * translationSens * sbus.real.channel[0] +
+                  rotationSens * sbus.real.channel[3]);
+        set[1] = (0.5f * SQRT2 * translationSens * sbus.real.channel[2] - 0.5f * SQRT2 * translationSens * sbus.real.channel[0] +
+                  rotationSens * sbus.real.channel[3]);
+        set[2] = (0.5f * SQRT2 * translationSens * sbus.real.channel[2] + 0.5f * SQRT2 * translationSens * sbus.real.channel[0] +
+                  rotationSens * sbus.real.channel[3]);
+        set[3] = (-0.5f * SQRT2 * translationSens * sbus.real.channel[2] + 0.5f * SQRT2 * translationSens * sbus.real.channel[0] +
+                  rotationSens * sbus.real.channel[3]);
       } else {
         set[0] = (-0.5f * SQRT2 * translationSens * computerRxMsg.instruct.vx -
                   0.5f * SQRT2 * translationSens * computerRxMsg.instruct.vy + rotationSens * computerRxMsg.instruct.wz);

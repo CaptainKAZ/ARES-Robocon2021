@@ -49,7 +49,7 @@ Total : 52 files,  3342 codes, 1122 comments, 606 blanks, all 5070 lines
 | [ARES/Driver/Device/ops/ops.h](/ARES/Driver/Device/ops/ops.h) | C++ | 16 | 17 | 5 | 38 |
 | [ARES/Driver/Device/sbus/sbus.c](/ARES/Driver/Device/sbus/sbus.c) | C | 58 | 31 | 13 | 102 |
 | [ARES/Driver/Device/sbus/sbus.h](/ARES/Driver/Device/sbus/sbus.h) | C++ | 13 | 17 | 5 | 35 |
-| [ARES/Library/algorithm/quintic_trajactory.c](/ARES/Library/algorithm/quintic_trajactory.c) | C | 50 | 34 | 5 | 89 |
+| [ARES/Library/algorithm/quintic_trajectory.c](/ARES/Library/algorithm/quintic_trajectory.c) | C | 50 | 34 | 5 | 89 |
 | [ARES/Library/algorithm/quintic_trajectory.h](/ARES/Library/algorithm/quintic_trajectory.h) | C++ | 14 | 17 | 5 | 36 |
 | [ARES/Library/algorithm/user_lib.c](/ARES/Library/algorithm/user_lib.c) | C | 138 | 52 | 21 | 211 |
 | [ARES/Library/algorithm/user_lib.h](/ARES/Library/algorithm/user_lib.h) | C++ | 43 | 18 | 8 | 69 |

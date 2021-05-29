@@ -60,7 +60,7 @@ osThreadId_t QuickTestHandle;
 const osThreadAttr_t QuickTest_attributes = {
   .name = "QuickTest",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 512 * 4
+  .stack_size = 256 * 4
 };
 /* Definitions for INS */
 osThreadId_t INSHandle;

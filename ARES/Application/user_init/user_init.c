@@ -48,17 +48,7 @@ void User_Init(void) {
   HAL_GPIO_WritePin(PWR3_GPIO_Port, PWR3_Pin, GPIO_PIN_SET);
   CAN_Start(INTERNAL_CAN1);
   CAN_Start(INTERNAL_CAN2);
-  CAN_Start(EXTERNAL_MCP2515);
+  //CAN_Start(EXTERNAL_MCP2515);
   HAL_Delay(5);
-  HAL_Delay(5);
-  for (uint16_t i = 0; i < 20; i++) {
-    Encoder_setMode(INTERNAL_CAN1, 0x02, 0xAA);
-    Encoder_setMode(INTERNAL_CAN2, 0x02, 0xAA);
-    Encoder_setMode(INTERNAL_CAN1, 0x03, 0xAA);
-    Encoder_setMode(INTERNAL_CAN2, 0x03, 0xAA);
-    Encoder_setFeedbackTime(INTERNAL_CAN1, 0x02, 1000);
-    Encoder_setFeedbackTime(INTERNAL_CAN2, 0x02, 1000);
-    Encoder_setFeedbackTime(INTERNAL_CAN1, 0x03, 1000);
-    Encoder_setFeedbackTime(INTERNAL_CAN2, 0x03, 1000);
-  }
+  
 }

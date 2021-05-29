@@ -31,7 +31,7 @@ MFX_output_t      motionFX_output;
 TaskHandle_t      INS_task_handle;
 INS_task_status_t INS_task_status;
 
-static stopwatch_t     stopwatch;
+static StopWatch     stopwatch;
 static MFX_input_t     motionFX_input;
 static MMC_Input_t     mag_cal_in;
 static MFX_knobs_t     knobs;
@@ -134,10 +134,10 @@ uint8_t save_cal_data(imu_cal_t *data) {
 void ins_task(void *pvParameters) {
   //延迟等待系统稳定
   vTaskDelay(MOTIONFX_INIT_TIME);
-  feedback_register(&motionFX_output.quaternion_9X[0], FEEDBACK_MFX_QUART_1);
-  feedback_register(&motionFX_output.quaternion_9X[1], FEEDBACK_MFX_QUART_2);
-  feedback_register(&motionFX_output.quaternion_9X[2], FEEDBACK_MFX_QUART_3);
-  feedback_register(&motionFX_output.quaternion_9X[3], FEEDBACK_MFX_QUART_4);
+  //feedback_register(&motionFX_output.quaternion_9X[0], FEEDBACK_MFX_QUART_1);
+  //feedback_register(&motionFX_output.quaternion_9X[1], FEEDBACK_MFX_QUART_2);
+  //feedback_register(&motionFX_output.quaternion_9X[2], FEEDBACK_MFX_QUART_3);
+  //feedback_register(&motionFX_output.quaternion_9X[3], FEEDBACK_MFX_QUART_4);
   //初始化MPU6500
   while (mpu_init() != MPU6500_NO_ERROR) {
     ;

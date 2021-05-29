@@ -47,7 +47,13 @@
       "mcp2515_reg.h": "c",
       "cmsis_armcc.h": "c",
       "quick_test_task.h": "c",
-      "motor.h": "c"
+      "motor.h": "c",
+      "guncontrol.h": "c",
+      "user_lib.h": "c",
+      "fast_math_templates.h": "c",
+      "swerve.h": "c",
+      "s_curve.h": "c",
+      "main.h": "c"
     },
 	},
 	"extensions": {

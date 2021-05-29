@@ -69,6 +69,12 @@ typedef signed long long   int64_t;
 #ifndef FAIL
 #define FAIL 0
 #endif
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
 #ifndef DEG2RAD
 #define DEG2RAD(x) ((x)*0.01745329251994329576923690768489f)
 #endif
@@ -116,6 +122,8 @@ void Error_Handler(void);
 #define LED4_GPIO_Port GPIOG
 #define LED3_Pin GPIO_PIN_3
 #define LED3_GPIO_Port GPIOG
+#define POT_PROXIMITY_Pin GPIO_PIN_10
+#define POT_PROXIMITY_GPIO_Port GPIOF
 #define LED2_Pin GPIO_PIN_2
 #define LED2_GPIO_Port GPIOG
 #define KEY_Pin GPIO_PIN_2

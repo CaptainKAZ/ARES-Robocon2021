@@ -74,7 +74,7 @@
 │
 └─Library (支持函数库)
     ├─algorithm (一般算法)
-    │      quintic_trajactory.c (五次多项式生成)
+    │      quintic_trajectory.c (五次多项式生成)
     │      quintic_trajectory.h
     │      user_lib.c (各种数学函数 扒RM官方开源的)
     │      user_lib.h
