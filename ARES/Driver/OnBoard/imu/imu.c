@@ -132,7 +132,7 @@ uint8_t mpu_init(void) {
 
   uint8_t writeNum = 0;
 
-  //check commiunication is normal
+  //check communication is normal
   mpu_read_reg(MPU_WHO_AM_I);
   HAL_Delay(wait_time);
   mpu_read_reg(MPU_WHO_AM_I);
@@ -141,7 +141,7 @@ uint8_t mpu_init(void) {
   mpu_write_reg(MPU_PWR_MGMT_1, MPU_DEVICE_RESET);
   HAL_Delay(sleepTime);
 
-  //check commiunication is normal after reset
+  //check communication is normal after reset
   mpu_read_reg(MPU_WHO_AM_I);
   HAL_Delay(wait_time);
   mpu_read_reg(MPU_WHO_AM_I);

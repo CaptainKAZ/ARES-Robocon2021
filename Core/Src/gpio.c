@@ -56,7 +56,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(IST_RST_GPIO_Port, IST_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(MCP_NSS_GPIO_Port, MCP_NSS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(INTERBOARD_NSS_GPIO_Port, INTERBOARD_NSS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOH, PWR0_Pin|PWR1_Pin|PWR2_Pin|PWR3_Pin, GPIO_PIN_RESET);
@@ -88,11 +88,11 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(MPU_DRDY_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = MCP_NSS_Pin;
+  GPIO_InitStruct.Pin = INTERBOARD_NSS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  HAL_GPIO_Init(MCP_NSS_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(INTERBOARD_NSS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA10 */
   GPIO_InitStruct.Pin = GPIO_PIN_10;
@@ -138,10 +138,10 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(KEY_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = MCP_INT_Pin;
+  GPIO_InitStruct.Pin = INTERBOARD_INT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(MCP_INT_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(INTERBOARD_INT_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 0);

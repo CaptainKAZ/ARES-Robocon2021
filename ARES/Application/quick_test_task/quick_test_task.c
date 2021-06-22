@@ -69,7 +69,7 @@ MotorInstructType doubleMotorCtrl0(Motor *motor, Controller *controller, void *p
 
 void quick_test_task() {
   vTaskDelay(1024);
-
+  while(test_motor==NULL)
   test_motor = CAN_Find_Motor(RM_MOTOR, INTERNAL_CAN1, 4);
 
   PID_ControllerInit(&whip_angle_pid, &whip_angle_constrain, &whip_angle_pid_param, 10);
@@ -84,7 +84,7 @@ void quick_test_task() {
     last_wake = xTaskGetTickCount();
     if (zeroed) {
       if (HAL_GPIO_ReadPin(POT_PROXIMITY_GPIO_Port, POT_PROXIMITY_Pin) == GPIO_PIN_RESET) {
-        set_angle = PI+0.1;
+        set_angle = PI+0.05;
       } else {
         set_angle = 0;
       }

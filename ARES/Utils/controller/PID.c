@@ -23,8 +23,8 @@
 #define PIDPARAM ((PID_ControllerParam *)(((Controller *)self)->param))
 
 #define PID_NEEDINT(self)                                                                                                     \
-  ((PIDPARAM->Int_type == CLAMPING_INT) ? ((ABS(PID->out[1]) <= PID->general.constrain->O_Hlim[0]) ||                         \
-                                           (SIGN(PID->out[1]) ^ (SIGN(PIDPARAM->kI) ^ SIGN(PID->err[0]))))                    \
+  ((PIDPARAM->Int_type == CLAMPING_INT) ? (!((__fabsf(PID->out[1]) >= PID->general.constrain->O_Hlim[0]) &&                   \
+                                             (SIGN(PID->out[1]) ^ (SIGN(PIDPARAM->kI) ^ SIGN(PID->err[0])))))                 \
                                         : 1)
 
 #define PID_Ierr(self)                                                                                                        \

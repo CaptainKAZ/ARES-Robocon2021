@@ -11,7 +11,7 @@
 
 static Motor *chassisMotor[4];
 static fp32   translationSens = 10000;
-static fp32   rotationSens    = 2000;
+static fp32   rotationSens    = -2000;
 
 static PID_ControllerParam chassisPid = {.general  = PIDPOS_CONTROLLER,
                                          .Int_type = BACK_CALCULATION_INT,
@@ -32,7 +32,7 @@ static fp32 set[4];
 //  return INSTRUCT_CURRENT;
 //}
 
-void chassis_task1(void *argument) {
+void chassis_task(void *argument) {
   vTaskDelay(623);
 
   while (chassisMotor[0] == NULL || chassisMotor[1] == NULL || chassisMotor[2] == NULL || chassisMotor[3] == NULL) {
@@ -81,7 +81,7 @@ void chassis_task1(void *argument) {
     osDelay(1);
   }
 }
-void chassis_task(void *argument) {
+void chassis_task0(void *argument) {
   vTaskDelay(623);
 
   while (chassisMotor[0] == NULL) {

@@ -98,8 +98,8 @@ void Error_Handler(void);
 #define MPU_DRDY_Pin GPIO_PIN_8
 #define MPU_DRDY_GPIO_Port GPIOB
 #define MPU_DRDY_EXTI_IRQn EXTI9_5_IRQn
-#define MCP_NSS_Pin GPIO_PIN_9
-#define MCP_NSS_GPIO_Port GPIOB
+#define INTERBOARD_NSS_Pin GPIO_PIN_9
+#define INTERBOARD_NSS_GPIO_Port GPIOB
 #define PWR0_Pin GPIO_PIN_2
 #define PWR0_GPIO_Port GPIOH
 #define PWR1_Pin GPIO_PIN_3
@@ -130,9 +130,9 @@ void Error_Handler(void);
 #define KEY_GPIO_Port GPIOB
 #define LED1_Pin GPIO_PIN_1
 #define LED1_GPIO_Port GPIOG
-#define MCP_INT_Pin GPIO_PIN_10
-#define MCP_INT_GPIO_Port GPIOB
-#define MCP_INT_EXTI_IRQn EXTI15_10_IRQn
+#define INTERBOARD_INT_Pin GPIO_PIN_10
+#define INTERBOARD_INT_GPIO_Port GPIOB
+#define INTERBOARD_INT_EXTI_IRQn EXTI15_10_IRQn
 /* USER CODE BEGIN Private defines */
 #define LED_GPIO_Port GPIOG
 /* USER CODE END Private defines */

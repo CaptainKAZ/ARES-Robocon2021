@@ -47,7 +47,7 @@ void CAN_Tx(CAN_Frame *frame) {
     TxHeader.TransmitGlobalTime = DISABLE;
     HAL_CAN_AddTxMessage(frame->device == INTERNAL_CAN1 ? &hcan1 : &hcan2, &TxHeader, frame->data, NULL);
   } else if (frame->device == EXTERNAL_MCP2515) {
-    Mcp2515_tx(frame);
+    //Mcp2515_tx(frame);
   }
 }
 
@@ -85,6 +85,6 @@ void CAN_Start(CAN_Device device) {
       Error_Handler();
     }
   } else if (device == EXTERNAL_MCP2515) {
-    Mcp2515_init();
+    //Mcp2515_init();
   }
 }

@@ -25,7 +25,7 @@
 #include "can_comm.h"
 #include "tim.h"
 #include "ops.h"
-#include "mcp2515.h"
+//#include "mcp2515.h"
 #include "computer_task.h"
 
 
@@ -69,8 +69,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
       MPU_NSS_L();
       imu_DMA_read();
     }
-  }else if(GPIO_Pin==MCP_INT_Pin){
-    Mcp2515_rxHook();
+//  }else if(GPIO_Pin==MCP_INT_Pin){
+//    Mcp2515_rxHook();
   }
 }
 
