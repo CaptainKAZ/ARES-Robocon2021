@@ -2,16 +2,39 @@
 #include "motor.h"
 #include "rm_motor.h"
 #include "feedback_task.h"
-Motor *testMotor[3];
+Motor *testMotor[4];
 
 #define HARDSOFT_THRESHOLD (600.0f)
 #define FRICTIONGEAR_RADIUS (0.04f)
 #define CLAMP_ANGLE (-1.85f)
 
-uint8_t             touchFlag                    = 0;
-fp32                friction0Speed               = 0;
-fp32                friction1Speed               = 0;
-fp32                shootSpeed                   = 10.0f;
+uint8_t touchFlag      = 0;
+fp32    friction0Speed = 0;
+fp32    friction1Speed = 0;
+fp32    shootSpeed     = 10.0f;
+
+PID_Controller motor_angle_pid;
+
+PID_ControllerParam motor_angle_pidparam = {.general  = PIDPOS_CONTROLLER,
+                                            .Int_type = NORMAL_INT,
+                                            .kP       = 30000.0f,
+                                            .kI       = 50000.0f,
+                                            .kD       = 0.3f,
+                                            .kB       = 0.3f,
+                                            .max_Iout = 5000,
+                                            .N        = 0};
+
+static fp32                motor_angle_O_Hlim      = 16000;
+static fp32                motor_angle_O_Llim      = -16000;
+static fp32                motor_angle_I_loop_Llim = 0;
+static fp32                motor_angle_I_loop_Hlim = 0;
+static ControllerConstrain motor_angle_constrain   = {.I_loop_Hlim = &motor_angle_I_loop_Hlim,
+                                                    .I_loop_Llim = &motor_angle_I_loop_Llim,
+                                                    .O_Hlim      = &motor_angle_O_Hlim,
+                                                    .O_Llim      = &motor_angle_O_Llim};
+
+static fp32         ang;
+static fp32         set;
 PID_ControllerParam friction_speed_pidparam_soft = {.general  = PIDPOS_CONTROLLER,
                                                     .Int_type = NORMAL_INT,
                                                     .kP       = 12.0f,
@@ -83,12 +106,15 @@ uint8_t zero     = 0;
 int32_t timebase = 0;
 void    quick_test_task() {
   vTaskDelay(105);
-  while (testMotor[0] == NULL && testMotor[1] == NULL && testMotor[2] == NULL) {
+  while (testMotor[0] == NULL && testMotor[1] == NULL && testMotor[2] == NULL && testMotor[3] == NULL) {
     testMotor[0] = CAN_Find_Motor(RM_MOTOR, INTERNAL_CAN2, 4);
     testMotor[1] = CAN_Find_Motor(RM_MOTOR, INTERNAL_CAN2, 5);
     testMotor[2] = CAN_Find_Motor(RM_MOTOR, INTERNAL_CAN2, 6);
+    testMotor[3] = CAN_Find_Motor(RM_MOTOR, INTERNAL_CAN2, 7);
     vTaskDelay(10);
   }
+  PID_ControllerInit(&motor_angle_pid, &motor_angle_constrain, &motor_angle_pidparam, 10);
+  Motor_SetAnglePID(testMotor[3], &motor_angle_pidparam);
   Motor_SetAnglePID(testMotor[2], &clamp_angle_pidparam);
   Motor_SetSpeedPID(testMotor[2], &clamp_speed_pidparam);
   Motor_SetAltController(testMotor[0], NULL, &friction0Speed, frictionGearControl);
@@ -96,6 +122,10 @@ void    quick_test_task() {
   Motor_SetAltController(testMotor[2], NULL, NULL, clampMotorControl);
   for (;;) {
     if (sbus.real.channel[SBUS_SA_CHANNEL] > 0.8f) {
+      ang        = (testMotor[3]->status.cumulative_turn * 2 * PI + testMotor[3]->status.angle - testMotor[3]->status.zero);
+      set        = sbus.real.channel[SBUS_V1_CHANNEL] * PI;
+      fp32 speed = controllerUpdate((Controller *)&motor_angle_pid, &set, &ang, NULL);
+      Motor_SetSpeed(testMotor[3], speed, 200);
       if (zero) {
         friction0Speed = -shootSpeed * 60.0f / (2.0f * PI * FRICTIONGEAR_RADIUS);
         friction1Speed = shootSpeed * 60.0f / (2.0f * PI * FRICTIONGEAR_RADIUS);
