@@ -23,7 +23,7 @@
 #include "encoder.h"
 #include "gpio.h"
 #include "can.h"
-#include "mcp2515.h"
+#include "interboard_spi.h"
 #include "monitor_task.h"
 
 void User_Init(void) {
@@ -48,6 +48,7 @@ void User_Init(void) {
   HAL_GPIO_WritePin(PWR3_GPIO_Port, PWR3_Pin, GPIO_PIN_SET);
   CAN_Start(INTERNAL_CAN1);
   CAN_Start(INTERNAL_CAN2);
+  Interboard_init();
   //CAN_Start(EXTERNAL_MCP2515);
   HAL_Delay(5);
   

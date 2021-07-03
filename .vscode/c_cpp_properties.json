@@ -19,8 +19,9 @@
                 "${workspaceFolder}\\Middlewares\\Third_Party\\FreeRTOS\\Source",
                 "${workspaceFolder}\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\MemMang",
                 "${workspaceFolder}\\Middlewares\\ST\\STM32_MotionFX_Library\\Inc",
-                "${workspaceFolder}\\ARES\\**",
-                "${workspaceFolder}\\**"
+                "${workspaceFolder}/ARES/**",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/ARES/Application/**"
             ],
             "defines": [
                 "USE_HAL_DRIVER",

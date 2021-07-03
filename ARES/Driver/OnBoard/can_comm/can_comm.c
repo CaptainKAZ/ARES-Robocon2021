@@ -16,7 +16,10 @@
   * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
   */
 #include "can_comm.h"
-#include "mcp2515.h"
+#include "interboard_spi.h"
+#include "string.h"
+
+uint8_t canRxBuf[sizeof(CAN_Frame) + 8];
 
 extern void RM_Motor_rxHook(CAN_Frame *frame);
 extern void RMD_Motor_RxHook(CAN_Frame *frame);
@@ -46,8 +49,13 @@ void CAN_Tx(CAN_Frame *frame) {
     TxHeader.RTR                = CAN_RTR_DATA;
     TxHeader.TransmitGlobalTime = DISABLE;
     HAL_CAN_AddTxMessage(frame->device == INTERNAL_CAN1 ? &hcan1 : &hcan2, &TxHeader, frame->data, NULL);
-  } else if (frame->device == EXTERNAL_MCP2515) {
-    //Mcp2515_tx(frame);
+  } else if (frame->device <= EXTERNAL_CAN2) {
+    memset(canRxBuf, 0, sizeof(canRxBuf));
+    memcpy(canRxBuf, frame, sizeof(CAN_Frame));
+    memcpy(&canRxBuf[sizeof(CAN_Frame)], frame->data, frame->len);
+    if (interboardTxState != INTERBOARD_BUSY) {
+      Interboard_tx(INTERBOARDMSG_CAN, sizeof(canRxBuf), canRxBuf);
+    }
   }
 }
 
@@ -84,7 +92,5 @@ void CAN_Start(CAN_Device device) {
     if (HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
       Error_Handler();
     }
-  } else if (device == EXTERNAL_MCP2515) {
-    //Mcp2515_init();
   }
 }

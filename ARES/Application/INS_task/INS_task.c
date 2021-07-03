@@ -131,7 +131,7 @@ uint8_t save_cal_data(imu_cal_t *data) {
   return Flash_Save((uint8_t*)data, sizeof(imu_cal_t));
 }
 
-void ins_task(void *pvParameters) {
+void ins_task0(void *pvParameters) {
   //延迟等待系统稳定
   vTaskDelay(MOTIONFX_INIT_TIME);
   //feedback_register(&motionFX_output.quaternion_9X[0], FEEDBACK_MFX_QUART_1);

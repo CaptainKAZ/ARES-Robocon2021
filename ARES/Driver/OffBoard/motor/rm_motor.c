@@ -22,7 +22,7 @@
 
 MonitorList rmMotorMonitor;
 
-static RM_Motor rmMotor[3][8];
+static RM_Motor rmMotor[4][8];
 
 static uint16_t          rmMotorOccupyReg = 0;
 static SemaphoreHandle_t rmMotorMutex     = NULL;
@@ -250,7 +250,7 @@ void RM_Motor_execute(void) {
     rmMotorMutex = xSemaphoreCreateMutexStatic(&rmMotorMutexBuffer);
   }
   xSemaphoreTake(rmMotorMutex, portMAX_DELAY);
-  for (uint8_t i = 0; i < 2; i++) {
+  for (uint8_t i = 0; i < 4; i++) {
     for (uint8_t j = 0; j < 8; j++) {
       if (rmMotor[i][j].general.info.type == RM_MOTOR) {
         //结构体已经初始化
@@ -307,6 +307,26 @@ void RM_Motor_execute(void) {
       rmMotor[1][6].general.instruct.type != INSTRUCT_EASE || rmMotor[1][7].general.instruct.type != INSTRUCT_EASE) {
     RM_Motor_command(rmMotor[1][4].set_current, rmMotor[1][5].set_current, rmMotor[1][6].set_current,
                      rmMotor[1][7].set_current, RM_MOTOR_FRAME_HEAD_2, INTERNAL_CAN2);
+  }
+  if (rmMotor[2][0].general.instruct.type != INSTRUCT_EASE || rmMotor[2][1].general.instruct.type != INSTRUCT_EASE ||
+      rmMotor[2][2].general.instruct.type != INSTRUCT_EASE || rmMotor[2][3].general.instruct.type != INSTRUCT_EASE) {
+    RM_Motor_command(rmMotor[2][0].set_current, rmMotor[2][1].set_current, rmMotor[2][2].set_current,
+                     rmMotor[2][3].set_current, RM_MOTOR_FRAME_HEAD_1, EXTERNAL_CAN1);
+  }
+  if (rmMotor[2][4].general.instruct.type != INSTRUCT_EASE || rmMotor[2][5].general.instruct.type != INSTRUCT_EASE ||
+      rmMotor[2][6].general.instruct.type != INSTRUCT_EASE || rmMotor[2][7].general.instruct.type != INSTRUCT_EASE) {
+    RM_Motor_command(rmMotor[2][4].set_current, rmMotor[2][5].set_current, rmMotor[2][6].set_current,
+                     rmMotor[2][7].set_current, RM_MOTOR_FRAME_HEAD_2, EXTERNAL_CAN1);
+  }
+  if (rmMotor[3][0].general.instruct.type != INSTRUCT_EASE || rmMotor[3][1].general.instruct.type != INSTRUCT_EASE ||
+      rmMotor[3][2].general.instruct.type != INSTRUCT_EASE || rmMotor[3][3].general.instruct.type != INSTRUCT_EASE) {
+    RM_Motor_command(rmMotor[3][0].set_current, rmMotor[3][1].set_current, rmMotor[3][2].set_current,
+                     rmMotor[3][3].set_current, RM_MOTOR_FRAME_HEAD_1, EXTERNAL_CAN2);
+  }
+  if (rmMotor[3][4].general.instruct.type != INSTRUCT_EASE || rmMotor[3][5].general.instruct.type != INSTRUCT_EASE ||
+      rmMotor[3][6].general.instruct.type != INSTRUCT_EASE || rmMotor[3][7].general.instruct.type != INSTRUCT_EASE) {
+    RM_Motor_command(rmMotor[3][4].set_current, rmMotor[3][5].set_current, rmMotor[3][6].set_current,
+                     rmMotor[3][7].set_current, RM_MOTOR_FRAME_HEAD_2, EXTERNAL_CAN2);
   }
 }
 

@@ -1,9 +1,9 @@
 {
 	"folders": [
-		{
-			"path": "."
-		}
-	],
+    {
+      "path": "."
+    }
+  ],
 	"settings": {
 		"files.autoSave": "afterDelay",
 		"editor.tabSize": 2,
@@ -53,7 +53,9 @@
       "fast_math_templates.h": "c",
       "swerve.h": "c",
       "s_curve.h": "c",
-      "main.h": "c"
+      "main.h": "c",
+      "interboard_spi.h": "c",
+      "spi.h": "c"
     },
 	},
 	"extensions": {

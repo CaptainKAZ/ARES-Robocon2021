@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F427xx, ARM_MATH_CM4,__TARGET_FPU_VFP=1</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;      ../Drivers/STM32F4xx_HAL_Driver/Inc;      ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;      ../Middlewares/Third_Party/FreeRTOS/Source/include;      ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;      ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;      ../Drivers/CMSIS/Include;      ..\DSP\Include;      ..\Drivers\CMSIS\DSP\Include;      ../Middlewares/ST/STM32_MotionFX_Library/Inc;      ../Middlewares/ST/STM32_MotionMC_Library/Inc;      ..\ARES\Application\INS_task;      ..\ARES\Application\motor_task;      ..\ARES\Application\state_steaming;      ..\ARES\Application\user_init;      ..\ARES\Application\feedback_task;      ..\ARES\Application\monitor_task;      ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;      ..\ARES\Application\quick_test_task;      ..\ARES\Application\chassis_task;      ..\ARES\Application\computer_task;      ..\ARES\Driver\Components\steer;      ..\ARES\Driver\OffBoard\encoder;      ..\ARES\Driver\OffBoard\mcp2515;      ..\ARES\Driver\OffBoard\motor;      ..\ARES\Driver\OffBoard\ops;      ..\ARES\Driver\OffBoard\sbus;      ..\ARES\Driver\OnBoard\can_comm;      ..\ARES\Driver\OnBoard\flash;      ..\ARES\Driver\OnBoard\imu;      ..\ARES\Utils\algorithm;      ..\ARES\Utils\controller;      ..\ARES\Utils\cpu_utils;      ..\ARES\Utils\stopwatch;      ..\ARES\Driver\Components\swerve</IncludePath>
+              <IncludePath>../Core/Inc; ../Drivers/STM32F4xx_HAL_Driver/Inc; ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy; ../Middlewares/Third_Party/FreeRTOS/Source/include; ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F; ../Drivers/CMSIS/Device/ST/STM32F4xx/Include; ../Drivers/CMSIS/Include; ..\DSP\Include; ..\Drivers\CMSIS\DSP\Include; ../Middlewares/ST/STM32_MotionFX_Library/Inc; ../Middlewares/ST/STM32_MotionMC_Library/Inc; ..\ARES\Application\INS_task; ..\ARES\Application\motor_task; ..\ARES\Application\state_steaming; ..\ARES\Application\user_init; ..\ARES\Application\feedback_task; ..\ARES\Application\monitor_task; ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2; ..\ARES\Application\quick_test_task; ..\ARES\Application\chassis_task; ..\ARES\Application\computer_task; ..\ARES\Driver\Components\steer; ..\ARES\Driver\OffBoard\encoder; ..\ARES\Driver\OffBoard\mcp2515; ..\ARES\Driver\OffBoard\motor; ..\ARES\Driver\OffBoard\ops; ..\ARES\Driver\OffBoard\sbus; ..\ARES\Driver\OnBoard\can_comm; ..\ARES\Driver\OnBoard\flash; ..\ARES\Driver\OnBoard\imu; ..\ARES\Utils\algorithm; ..\ARES\Utils\controller; ..\ARES\Utils\cpu_utils; ..\ARES\Utils\stopwatch; ..\ARES\Driver\Components\swerve; ..\ARES\Driver\OffBoard\interboard_spi</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -776,6 +776,11 @@
               <FileName>sbus.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ARES\Driver\OffBoard\sbus\sbus.c</FilePath>
+            </File>
+            <File>
+              <FileName>interboard_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\OffBoard\interboard_spi\interboard_spi.c</FilePath>
             </File>
           </Files>
         </Group>

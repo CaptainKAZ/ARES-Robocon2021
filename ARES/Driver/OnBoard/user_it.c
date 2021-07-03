@@ -25,23 +25,21 @@
 #include "can_comm.h"
 #include "tim.h"
 #include "ops.h"
-//#include "mcp2515.h"
 #include "computer_task.h"
-
+#include "interboard_spi.h"
 
 /**
   * @brief    TIM6中断服务程序，负责计时器更新
   * 
   */
-void TIM6_DAC_IRQHandler(void) { if (__HAL_TIM_GET_FLAG(&htim6, TIM_FLAG_UPDATE) != RESET)
-  {
-    if (__HAL_TIM_GET_IT_SOURCE(&htim6, TIM_IT_UPDATE) != RESET)
-    {
+void TIM6_DAC_IRQHandler(void) {
+  if (__HAL_TIM_GET_FLAG(&htim6, TIM_FLAG_UPDATE) != RESET) {
+    if (__HAL_TIM_GET_IT_SOURCE(&htim6, TIM_IT_UPDATE) != RESET) {
       __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
-        Stopwatch_hook();
-
+      Stopwatch_hook();
     }
-  } }
+  }
+}
 
 /**
   * @brief    USART1中断服务程序，负责SBUS更新
@@ -69,8 +67,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
       MPU_NSS_L();
       imu_DMA_read();
     }
-//  }else if(GPIO_Pin==MCP_INT_Pin){
-//    Mcp2515_rxHook();
+    //  }else if(GPIO_Pin==MCP_INT_Pin){
+    //    Mcp2515_rxHook();
   }
 }
 
@@ -84,11 +82,13 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
     MPU_NSS_H();
     HAL_SPI_DMAStop(hspi);
     //唤醒ins任务
-     if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
-       static BaseType_t xHigherPriorityTaskWoken;
-       vTaskNotifyGiveFromISR(INS_task_handle, &xHigherPriorityTaskWoken);
-       portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-     }
+    if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+      static BaseType_t xHigherPriorityTaskWoken;
+      vTaskNotifyGiveFromISR(INS_task_handle, &xHigherPriorityTaskWoken);
+      portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    }
+  } else if (hspi == &hspi1) {
+    Interboard_txRxCpltHook();
   }
 }
 /**
@@ -97,11 +97,11 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
   * @param    hcan      
   */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-  uint8_t           CAN_RxData[8];
+  uint8_t             CAN_RxData[8];
   CAN_RxHeaderTypeDef RxMsgHdr;
   CAN_Frame           frame;
   HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxMsgHdr, CAN_RxData);
-  frame.data = CAN_RxData;
+  frame.data   = CAN_RxData;
   frame.device = hcan->Instance == CAN1 ? INTERNAL_CAN1 : INTERNAL_CAN2;
   frame.id     = RxMsgHdr.IDE == CAN_ID_STD ? RxMsgHdr.StdId : RxMsgHdr.ExtId;
   frame.len    = RxMsgHdr.DLC;
@@ -114,7 +114,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
   * 
   */
 void UART7_IRQHandler(void) {
-  if(huart7.Instance->SR & UART_FLAG_RXNE){
+  if (huart7.Instance->SR & UART_FLAG_RXNE) {
     __HAL_UART_CLEAR_PEFLAG(&huart7);
     __HAL_UART_FLUSH_DRREGISTER(&huart7);
     return;
@@ -129,13 +129,19 @@ void UART7_IRQHandler(void) {
   * 
   */
 void USART6_IRQHandler(void) {
-  
+
   if (huart6.Instance->SR & UART_FLAG_IDLE) {
     Computer_hook();
-  }else{
+  } else {
     HAL_UART_IRQHandler(&huart6);
     __HAL_UART_CLEAR_PEFLAG(&huart6);
     __HAL_UART_FLUSH_DRREGISTER(&huart6);
-    __HAL_UART_CLEAR_FLAG(&huart6,UART_FLAG_TC);
+    __HAL_UART_CLEAR_FLAG(&huart6, UART_FLAG_TC);
+  }
+}
+
+void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi) {
+  if (hspi == &hspi1) {
+    Interboard_errorHook();
   }
 }

@@ -57,6 +57,8 @@ typedef signed long long   int64_t;
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+#define MASTER_BOARD
+
 #ifndef PI
 #define PI 3.141592653589793238462643383279f
 #endif
