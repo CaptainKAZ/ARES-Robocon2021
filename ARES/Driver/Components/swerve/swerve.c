@@ -132,7 +132,7 @@ void Swerve_update(Swerve *swerve) {
         2.0f * PI - (fp32)(((swerve->encoder->value)) % (-swerve->encoderRatio)) / (fp32)(-swerve->encoderRatio) * 2.0f * PI;
   }
 #else
-  swerve->steerAngle = fmodf((swerve->steerMotor->status.cumulative_turn * 2.0f * PI + swerve->steerMotor->status.angle -
+  swerve->steerAngle = fmodf((swerve->steerMotor->status.cumulativeTurn * 2.0f * PI + swerve->steerMotor->status.angle -
                               swerve->steerMotor->status.zero) /
                                  swerve->steerMotorRatio,
                              2*PI);

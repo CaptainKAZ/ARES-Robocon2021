@@ -26,7 +26,7 @@ typedef struct {
   uint32_t       status1_timestamp;
   uint32_t       status4_timestamp;
   fp32           zero;
-  uint32_t       cumulative_turn;
+  uint32_t       cumulativeTurn;
 } VESC_Motor;
 
 typedef enum {

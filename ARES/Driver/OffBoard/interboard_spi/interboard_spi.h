@@ -36,7 +36,7 @@ typedef enum {
   */
 #define INTERBOARD_MAX_FRAME_LENGTH (30)
 #define INTERBOARD_FRAME_HEAD (0x0F)
-#define INTERBOARD_FRAME_ACK (0xF0)
+#define INTERBOARD_FRAME_ACK_BIT (1<<6)
 #define INTERBOARD_TXBUF_SIZE (3)
 typedef enum {
   INTERBOARDMSG_CAN,

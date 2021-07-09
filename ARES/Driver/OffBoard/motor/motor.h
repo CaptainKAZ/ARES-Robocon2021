@@ -38,11 +38,12 @@ typedef struct {
 } MotorInfo;
 
 typedef enum {
-  INSTRUCT_EASE = 0,    //不控制 不发出CAN帧 节约带宽
-  INSTRUCT_CURRENT,     //电流控制，单位为mA
-  INSTRUCT_SPEED,       //转速控制，单位为RPM
-  INSTRUCT_ANGLE,       //角度控制，弧度制
-  INSTRUCT_ALTERNATIVE, //使用备选控制器
+  INSTRUCT_EASE = 0,         //不控制 不发出CAN帧 节约带宽
+  INSTRUCT_CURRENT,          //电流控制，单位为mA
+  INSTRUCT_SPEED,            //转速控制，单位为RPM
+  INSTRUCT_ANGLE,            //角度控制，弧度制
+  INSTRUCT_ANGLE_CUMULATIVE, //角度控制，累计角度
+  INSTRUCT_ALTERNATIVE,      //使用备选控制器
 } MotorInstructType;
 
 typedef struct {
@@ -57,13 +58,16 @@ typedef struct {
   fp32    angle; //弧度制
   fp32    temperature;
   fp32    zero;
-  int32_t cumulative_turn;
+  int32_t cumulativeTurn;
+  fp32    speedOutput;
+  fp32    angleOutput;
 } MotorStatus;
 
 typedef struct Motor {
   MotorInfo     info;
   MotorStatus   status;
   MotorInstruct instruct;
+  fp32          reductionRatio;
   Controller *  alt_controller;
   void *        alt_controller_param;
   MotorInstructType (*alt_controller_update)(struct Motor *motor, Controller *controller, void *param);
@@ -80,5 +84,8 @@ extern void Motor_SetAltController(Motor *self, Controller *alt_controller, void
                                                                               void *param));
 extern void Motor_AltControl(Motor *self, uint32_t timeout);
 Motor *     CAN_Find_Motor(MotorType type, CAN_Device device, uint8_t id);
+extern void RM_Motor_setAsM3508(Motor *self);
+extern void RM_Motor_setAsM2006(Motor *self);
+extern void RM_Motor_setAsGm6020(Motor *self)
 
 #endif

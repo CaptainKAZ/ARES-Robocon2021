@@ -51,7 +51,7 @@ PID_ControllerParam clamp_angle_pidparam = {.general  = PIDPOS_CONTROLLER,
 static fp32       actualAngle;
 static fp32       setAngle;
 MotorInstructType clampMotorControl(Motor *motor, Controller *controller, void *param) {
-  actualAngle = (2 * PI * motor->status.cumulative_turn + motor->status.angle - motor->status.zero) / M2006_REDUCTION_RATIO;
+  actualAngle = (2 * PI * motor->status.cumulativeTurn + motor->status.angle - motor->status.zero) / M2006_REDUCTION_RATIO;
   fp32 rpm    = controllerUpdate((Controller *)&((RM_Motor *)motor)->angle_pid, &setAngle, &actualAngle, NULL);
   ((RM_Motor *)motor)->set_current =
       controllerUpdate((Controller *)&((RM_Motor *)motor)->speed_pid, &rpm, &motor->status.speed, NULL);

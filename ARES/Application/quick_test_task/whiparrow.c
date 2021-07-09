@@ -76,7 +76,7 @@ static PID_ControllerParam dir_angle_pidparam = {.general  = PIDPOS_CONTROLLER,
 
 static fp32       ag;
 MotorInstructType doubleMotorCtrl0(Motor *motor, Controller *controller) {
-  ag       = (2 * PI * motor->status.cumulative_turn + motor->status.angle - motor->status.zero) / M3508_REDUCTION_RATIO;
+  ag       = (2 * PI * motor->status.cumulativeTurn + motor->status.angle - motor->status.zero) / M3508_REDUCTION_RATIO;
   fp32 rpm = M3508_REDUCTION_RATIO * 1000 * 9.5492965855137201461330258023509f * set_rads +
              controllerUpdate(controller, &set_angle, &ag, NULL);
   ((RM_Motor *)motor)->set_current =

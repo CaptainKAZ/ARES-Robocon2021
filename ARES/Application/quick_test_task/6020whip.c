@@ -83,7 +83,7 @@ static fp32 rpmcom;
 static fp32 rpm;
 MotorInstructType doubleMotorCtrl0(Motor *motor, Controller *controller, void *param) {
   (void)param;
-  ag       = (2 * PI * motor->status.cumulative_turn + motor->status.angle - motor->status.zero) / M3508_REDUCTION_RATIO;
+  ag       = (2 * PI * motor->status.cumulativeTurn + motor->status.angle - motor->status.zero) / M3508_REDUCTION_RATIO;
   rpmcom=         controllerUpdate(controller, &set_angle, &ag, NULL);
   rpm = M3508_REDUCTION_RATIO * 1000 * 9.5492965855137201461330258023509f * set_rads + rpmcom;
              

@@ -18,12 +18,17 @@
 #include "interboard_spi.h"
 #include "string.h"
 #include "can_comm.h"
+#ifdef MASTER_BOARD
+#include "monitor_task.h"
+#endif
 
 #ifdef MASTER_BOARD
 #define HSPI hspi1
 #define NSS_H() HAL_GPIO_WritePin(INTERBOARD_NSS_GPIO_Port, INTERBOARD_NSS_Pin, GPIO_PIN_SET)
 #define NSS_L() HAL_GPIO_WritePin(INTERBOARD_NSS_GPIO_Port, INTERBOARD_NSS_Pin, GPIO_PIN_RESET)
 #define READ_INT() HAL_GPIO_ReadPin(INTERBOARD_INT_GPIO_Port, INTERBOARD_INT_Pin)
+static void   Interboard_guard(uint32_t *errorReg, uint32_t *errorTime);
+MonitorList interboardMonitor;
 #elif defined SLAVE_BOARD
 #define HSPI hspi2
 #define INT_H() HAL_GPIO_WritePin(INTERBOARD_INT_GPIO_Port, INTERBOARD_INT_Pin, GPIO_PIN_SET)
@@ -35,9 +40,11 @@
 
 fp32 batteryVoltage;
 
+
+
+static fp32     interboardFrequency;
 static uint32_t count;
 static uint32_t lastTime;
-fp32            interboardFrequency;
 
 static uint8_t txBufUsing;
 
@@ -97,15 +104,8 @@ void Interboard_errorHook() {
   * 
   */
 void Interboard_txRxCpltHook() {
-  //统计接收频率
-  if (HAL_GetTick() != lastTime) {
-    interboardFrequency = count * 1000;
-    count               = 0;
-  } else {
-    count++;
-  }
-  lastTime = HAL_GetTick();
 
+  count++;
 #ifdef MASTER_BOARD
   NSS_H();
 #elif defined SLAVE_BOARD
@@ -114,10 +114,13 @@ void Interboard_txRxCpltHook() {
     HAL_GPIO_TogglePin(LED_B_GPIO_Port, LED_B_Pin);
   }
 #endif
-
+  uint8_t txSuccess = 0;
   uint8_t rxSuccess = 0;
-  for (uint8_t i = 0; i < sizeof(interboardRxBuf); i++) {
-    if (interboardRxBuf[i] == INTERBOARD_FRAME_HEAD) {
+  for (uint8_t i = 0; i < 3; i++) {
+    if (READ_BIT(interboardRxBuf[i], INTERBOARD_FRAME_ACK_BIT)) {
+      txSuccess = 1;
+    }
+    if (interboardRxBuf[i] & INTERBOARD_FRAME_HEAD == INTERBOARD_FRAME_HEAD) {
       switch (interboardRxBuf[i + 1]) {
       case INTERBOARDMSG_CAN: rxSuccess = Interboard_canRxHook(&interboardRxBuf[i + 2]); break;
       case INTERBOARDMSG_BATT: rxSuccess = Interboard_battRxHook(&interboardRxBuf[i + 2]); break;
@@ -130,7 +133,20 @@ void Interboard_txRxCpltHook() {
       break;
     }
   }
-  txBufUsing = (txBufUsing + 1) % INTERBOARD_TXBUF_SIZE;
+
+  //如果发送成功才发送下一个缓冲区否则重发
+  txBufUsing = (txBufUsing + txSuccess) % INTERBOARD_TXBUF_SIZE;
+  if (interboardTxState == INTERBOARD_READY) {
+    memset(interboardTxBuf[txBufUsing], 0, INTERBOARD_MAX_FRAME_LENGTH);
+  } else {
+    //如果发送成功才减少发送缓冲区的占用标志
+    interboardTxState -= txSuccess;
+  }
+
+  //如果接收成功，发送ACK
+  if (rxSuccess) {
+    SET_BIT(interboardTxBuf[txBufUsing][0], INTERBOARD_FRAME_ACK_BIT);
+  }
 
 #ifdef MASTER_BOARD
   //等待一下从机准备好BUFFER
@@ -149,11 +165,7 @@ void Interboard_txRxCpltHook() {
   __NOP();
   __NOP();
 #endif
-  if (interboardTxState == INTERBOARD_READY) {
-    memset(interboardTxBuf[txBufUsing], 0, INTERBOARD_MAX_FRAME_LENGTH);
-  } else {
-    interboardTxState--;
-  }
+
   __HAL_SPI_CLEAR_OVRFLAG(&HSPI);
   while (HAL_OK !=
          HAL_SPI_TransmitReceive_DMA(&HSPI, interboardTxBuf[txBufUsing], interboardRxBuf, INTERBOARD_MAX_FRAME_LENGTH)) {
@@ -186,6 +198,7 @@ void Interboard_init() {
   while (READ_INT() != GPIO_PIN_SET)
     ;
   HAL_Delay(1);
+  Monitor_registor(&interboardMonitor, Interboard_guard,-1);
 #elif defined SLAVE_BOARD
   while (READ_NSS() != GPIO_PIN_SET)
     ;
@@ -208,3 +221,48 @@ void Interboard_tx(InterboardMsgType msgType, uint8_t len, uint8_t *buf) {
     memcpy(interboardTxBuf[buf2use] + 3, buf, len);
   }
 }
+#ifdef MASTER_BOARD
+static void Interboard_restart(){
+  interboardTxState = INTERBOARD_BUSY;
+  interboardRxState = INTERBOARD_BUSY;
+  
+  NSS_H();
+  HAL_GPIO_WritePin(PWR0_GPIO_Port, PWR0_Pin, GPIO_PIN_SET);
+
+  HAL_SPI_DMAStop(&HSPI);
+  HAL_SPI_Abort(&HSPI);
+  __HAL_SPI_CLEAR_FREFLAG(&HSPI);
+  __HAL_SPI_CLEAR_OVRFLAG(&HSPI);
+  __HAL_SPI_CLEAR_MODFFLAG(&HSPI);
+  HAL_SPI_DeInit(&HSPI);
+  vTaskDelay(10);
+  HAL_SPI_Init(&HSPI);
+
+  vTaskDelay(500);
+  HAL_GPIO_WritePin(PWR0_GPIO_Port, PWR1_Pin, GPIO_PIN_RESET);
+  while (READ_INT() != GPIO_PIN_SET){
+    vTaskDelay(1);
+  }
+  vTaskDelay(1);
+  
+
+  Interboard_start();
+  return;
+}
+
+static void Interboard_guard(uint32_t *errorReg, uint32_t *errorTime) {
+  interboardFrequency = count * 100;
+  count == 0;
+  if (interboardFrequency <= 2000&&xTaskGetTickCount()>3000) {
+    SET_BIT(*errorReg, MONITOR_ERROR_EXIST);
+    SET_BIT(*errorReg, MONITOR_ERROR_LOST);
+    *errorTime = xTaskGetTickCount();
+  }else{
+    *errorReg = 0;
+    *errorTime = 0;
+  }
+  if(*errorReg!=0){
+    Interboard_restart();
+  }
+}
+#endif

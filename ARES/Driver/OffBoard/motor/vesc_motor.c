@@ -91,9 +91,9 @@ void VESC_Motor_RxHook(CAN_Frame *frame) {
     vesc_motor[index].general.status.angle       = DEG2RAD(((frame->data[4] << 8 | frame->data[5]) / 50.0f));
     vesc_motor[index].general.status.temperature = (frame->data[2] << 8 | frame->data[3]) / 10.0f;
     if (vesc_motor[index].general.status.angle - last_angle > PI) {
-      vesc_motor[index].cumulative_turn--;
+      vesc_motor[index].cumulativeTurn--;
     } else if (vesc_motor[index].general.status.angle - last_angle < -PI) {
-      vesc_motor[index].cumulative_turn++;
+      vesc_motor[index].cumulativeTurn++;
     }
     break;
   default: break;
@@ -109,7 +109,7 @@ void VESC_Motor_Zero(Motor *self) {
   }
   xSemaphoreTake(VESC_Motor_Mutex, portMAX_DELAY);
   VESC->zero            = MOTOR->status.angle;
-  VESC->cumulative_turn = 0;
+  VESC->cumulativeTurn = 0;
   xSemaphoreGive(VESC_Motor_Mutex);
 }
 

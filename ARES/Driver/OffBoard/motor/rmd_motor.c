@@ -92,9 +92,9 @@ void RMD_Motor_RxHook(CAN_Frame *frame) {
     PARSE_RMD_MOTOR(&(rmd_motor[frame->device][id].general.status), frame->data);
     rmd_motor[frame->device][id].rx_timestamp = xTaskGetTickCount();
     if (rmd_motor[frame->device][id].general.status.angle - last_angle > PI) {
-      rmd_motor[frame->device][id].general.status.cumulative_turn--;
+      rmd_motor[frame->device][id].general.status.cumulativeTurn--;
     } else if (rmd_motor[frame->device][id].general.status.angle - last_angle < -PI) {
-      rmd_motor[frame->device][id].general.status.cumulative_turn++;
+      rmd_motor[frame->device][id].general.status.cumulativeTurn++;
     }
   }
 }
@@ -132,7 +132,7 @@ void RMD_Motor_Zero(Motor *self) {
   }
   xSemaphoreTake(RMD_Motor_Mutex, portMAX_DELAY);
   MOTOR->status.zero            = MOTOR->status.angle;
-  MOTOR->status.cumulative_turn = 0;
+  MOTOR->status.cumulativeTurn = 0;
   xSemaphoreGive(RMD_Motor_Mutex);
 }
 

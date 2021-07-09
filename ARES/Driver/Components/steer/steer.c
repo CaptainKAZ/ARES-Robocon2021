@@ -38,7 +38,7 @@ static MotorInstructType Steer_controllerUpdate(Motor *motor, Controller *contro
       STEER->angle = (360.0f - (fp32)(((STEER->encoder->value)) % (-STEER->encoderRatio)) / (fp32)(-STEER->encoderRatio) * 360.0f);
     }
 
-//    STEER->motor->status.cumulative_turn = (int32_t)(STEER->angle * STEER->motorRatio) / 360;
+//    STEER->motor->status.cumulativeTurn = (int32_t)(STEER->angle * STEER->motorRatio) / 360;
 //    STEER->motor->status.zero            = DEG2RAD((int32_t)(STEER->angle * STEER->motorRatio) % 360);
   
   fp32 rpmset = controllerUpdate(controller, &STEER->target, &STEER->angle, NULL);
@@ -64,7 +64,7 @@ void Steer_init(Steer *steer, CanEncoder *encoder, Motor *motor, int32_t encRati
     steer->angle = 360.0f - (fp32)(((steer->encoder->value)) % (-steer->encoderRatio)) / (fp32)(-steer->encoderRatio) * 360.0f;
   }
   steer->target                        = 0;
-//  steer->motor->status.cumulative_turn = (int32_t)(steer->angle * steer->motorRatio) / 360;
+//  steer->motor->status.cumulativeTurn = (int32_t)(steer->angle * steer->motorRatio) / 360;
 //  steer->motor->status.zero            = DEG2RAD((int32_t)(steer->angle * steer->motorRatio) % 360);
   PID_ControllerInit(&steer->controller, &steerConsterain, pidParam, 0.002f);
   Motor_SetAltController(steer->motor, (Controller *)&steer->controller, (void *)steer, Steer_controllerUpdate);
