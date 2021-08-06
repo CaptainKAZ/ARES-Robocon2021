@@ -68,7 +68,11 @@ void Ops_init(void) {
   */
 static void parseOps(volatile const uint8_t *ops_buf) {
   if (ops_buf[0] == 0x0D && ops_buf[1] == 0x0A && ops_buf[26] == 0x0A && ops_buf[27] == 0x0D) {
-    memcpy((uint8_t *)&ops, (void *)&ops_buf[2], sizeof(Ops) - 4);
+    fp32 x = ops.x;
+    fp32 y = ops.y;
+    memcpy((uint8_t *)&ops, (void *)&ops_buf[2], 24);
+    ops.vx         = (ops.x - x) * 0.1f;
+    ops.vx         = (ops.y - y) * 0.1f;
     ops.updateTime = xTaskGetTickCount();
   }
 }

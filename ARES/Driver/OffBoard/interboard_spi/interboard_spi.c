@@ -15,12 +15,48 @@
   * 
   * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
   */
+
+/**
+  *                                板间通信的基本流程
+  * 
+  * 设计思想：保证通信成功的前提下 最小化主机开销
+  * 
+  *    _________________________                        _________________________
+  *   |           ______________|                      |______________           |
+  *   |          |SPI1          |                      |          SPI2|          |
+  *   |          |              |                      |              |          |
+  *   |          |           CLK|______________________|CLK           |          |
+  *   |          |              |                      |              |          |
+  *   |          |          MISO|______________________|MISO          |          |
+  *   |          |              |                      |              |          |
+  *   |          |          MOSI|______________________|MOSI          |          |
+  *   |          |              |                      |              |          |
+  *   |          |______________|                      |______________|          |
+  *   |      __                 |                      |               __        |
+  *   |     |__|             INT|______________________|INT           |__|       |
+  *   |     USER             CSS|______________________|CSS           USER       |
+  *   |                         |                      |                         |
+  *   |               24v POWER0|                      |IN 24V                   |
+  *   |                      GND|______________________|GND                      |
+  *   |                         |                      |                         |
+  *   |_ MASTER ________________|                      |_ SLAVE _________________|
+  * 
+*/
+
+#include<stdio.h>
 #include "interboard_spi.h"
 #include "string.h"
 #include "can_comm.h"
+#include "computer_usb.h"
+
+#ifdef SLAVE_BOARD
+#include "usbd_cdc_if.h"
+#endif
 #ifdef MASTER_BOARD
 #include "monitor_task.h"
 #endif
+
+extern uint8_t Interboard_servoRxHook(uint8_t *buf, uint8_t len); 
 
 #ifdef MASTER_BOARD
 #define HSPI hspi1
@@ -28,7 +64,9 @@
 #define NSS_L() HAL_GPIO_WritePin(INTERBOARD_NSS_GPIO_Port, INTERBOARD_NSS_Pin, GPIO_PIN_RESET)
 #define READ_INT() HAL_GPIO_ReadPin(INTERBOARD_INT_GPIO_Port, INTERBOARD_INT_Pin)
 static void   Interboard_guard(uint32_t *errorReg, uint32_t *errorTime);
-MonitorList interboardMonitor;
+MonitorList   interboardMonitor;
+static fp32     interboardFrequency;
+static uint32_t count;
 #elif defined SLAVE_BOARD
 #define HSPI hspi2
 #define INT_H() HAL_GPIO_WritePin(INTERBOARD_INT_GPIO_Port, INTERBOARD_INT_Pin, GPIO_PIN_SET)
@@ -42,9 +80,7 @@ fp32 batteryVoltage;
 
 
 
-static fp32     interboardFrequency;
-static uint32_t count;
-static uint32_t lastTime;
+
 
 static uint8_t txBufUsing;
 
@@ -84,7 +120,6 @@ static uint8_t Interboard_battRxHook(uint8_t *buf) {
 
 static uint8_t Interboard_imuRxHook(uint8_t *buf) { return 0; }
 
-static uint8_t Interboard_computerRxHook(uint8_t *buf) { return 0; }
 
 /**
   * @brief    使用错误处理函数 可以实现热插拔
@@ -105,9 +140,9 @@ void Interboard_errorHook() {
   */
 void Interboard_txRxCpltHook() {
 
-  count++;
 #ifdef MASTER_BOARD
   NSS_H();
+  count++;
 #elif defined SLAVE_BOARD
   //闪烁指示灯
   if (HAL_GetTick() % 100 == 0) {
@@ -117,15 +152,16 @@ void Interboard_txRxCpltHook() {
   uint8_t txSuccess = 0;
   uint8_t rxSuccess = 0;
   for (uint8_t i = 0; i < 3; i++) {
-    if (READ_BIT(interboardRxBuf[i], INTERBOARD_FRAME_ACK_BIT)) {
+    if (READ_BIT(interboardRxBuf[i], INTERBOARD_FRAME_ACK_BIT) || (interboardTxBuf[i][0] & INTERBOARD_FRAME_HEAD) == 0) {
       txSuccess = 1;
     }
-    if (interboardRxBuf[i] & INTERBOARD_FRAME_HEAD == INTERBOARD_FRAME_HEAD) {
+    if ((interboardRxBuf[i] & INTERBOARD_FRAME_HEAD) == INTERBOARD_FRAME_HEAD) {
       switch (interboardRxBuf[i + 1]) {
       case INTERBOARDMSG_CAN: rxSuccess = Interboard_canRxHook(&interboardRxBuf[i + 2]); break;
       case INTERBOARDMSG_BATT: rxSuccess = Interboard_battRxHook(&interboardRxBuf[i + 2]); break;
       case INTERBOARDMSG_IMU: rxSuccess = Interboard_imuRxHook(&interboardRxBuf[i + 2]); break;
-      case INTERBOARDMSG_COMPUTER: rxSuccess = Interboard_computerRxHook(&interboardRxBuf[i + 2]); break;
+      case INTERBOARDMSG_COMPUTER: rxSuccess = Interboard_computerRxHook(&interboardRxBuf[i + 3], interboardRxBuf[i + 2]); break;
+      case INTERBOARDMSG_SERVO: rxSuccess = Interboard_servoRxHook(&interboardRxBuf[i + 3], interboardRxBuf[i + 2]); break;
       default: rxSuccess = 0; break;
       }
     }
@@ -138,6 +174,7 @@ void Interboard_txRxCpltHook() {
   txBufUsing = (txBufUsing + txSuccess) % INTERBOARD_TXBUF_SIZE;
   if (interboardTxState == INTERBOARD_READY) {
     memset(interboardTxBuf[txBufUsing], 0, INTERBOARD_MAX_FRAME_LENGTH);
+
   } else {
     //如果发送成功才减少发送缓冲区的占用标志
     interboardTxState -= txSuccess;
@@ -192,13 +229,13 @@ void Interboard_start() {
 void Interboard_init() {
 #ifdef MASTER_BOARD
   NSS_H();
+  HAL_GPIO_WritePin(PWR0_GPIO_Port, PWR0_Pin, GPIO_PIN_RESET);
+  HAL_Delay(600);
   HAL_GPIO_WritePin(PWR0_GPIO_Port, PWR0_Pin, GPIO_PIN_SET);
-  HAL_Delay(500);
-  HAL_GPIO_WritePin(PWR0_GPIO_Port, PWR1_Pin, GPIO_PIN_RESET);
   while (READ_INT() != GPIO_PIN_SET)
     ;
   HAL_Delay(1);
-  Monitor_registor(&interboardMonitor, Interboard_guard,-1);
+  Monitor_registor(&interboardMonitor, Interboard_guard, -1);
 #elif defined SLAVE_BOARD
   while (READ_NSS() != GPIO_PIN_SET)
     ;
@@ -221,11 +258,12 @@ void Interboard_tx(InterboardMsgType msgType, uint8_t len, uint8_t *buf) {
     memcpy(interboardTxBuf[buf2use] + 3, buf, len);
   }
 }
+
 #ifdef MASTER_BOARD
-static void Interboard_restart(){
+static void Interboard_restart() {
   interboardTxState = INTERBOARD_BUSY;
   interboardRxState = INTERBOARD_BUSY;
-  
+
   NSS_H();
   HAL_GPIO_WritePin(PWR0_GPIO_Port, PWR0_Pin, GPIO_PIN_SET);
 
@@ -240,11 +278,10 @@ static void Interboard_restart(){
 
   vTaskDelay(500);
   HAL_GPIO_WritePin(PWR0_GPIO_Port, PWR1_Pin, GPIO_PIN_RESET);
-  while (READ_INT() != GPIO_PIN_SET){
+  while (READ_INT() != GPIO_PIN_SET) {
     vTaskDelay(1);
   }
   vTaskDelay(1);
-  
 
   Interboard_start();
   return;
@@ -252,16 +289,16 @@ static void Interboard_restart(){
 
 static void Interboard_guard(uint32_t *errorReg, uint32_t *errorTime) {
   interboardFrequency = count * 100;
-  count == 0;
-  if (interboardFrequency <= 2000&&xTaskGetTickCount()>3000) {
+  count               = 0;
+  if (interboardFrequency <= 2000 && xTaskGetTickCount() > 3000) {
     SET_BIT(*errorReg, MONITOR_ERROR_EXIST);
     SET_BIT(*errorReg, MONITOR_ERROR_LOST);
     *errorTime = xTaskGetTickCount();
-  }else{
-    *errorReg = 0;
+  } else {
+    *errorReg  = 0;
     *errorTime = 0;
   }
-  if(*errorReg!=0){
+  if (*errorReg != 0) {
     Interboard_restart();
   }
 }

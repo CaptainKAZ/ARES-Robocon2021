@@ -20,10 +20,11 @@
 #include "main.h"
 
 typedef enum {
-  NONE_CONTROLLER = 0,          //未初始化
-  FSF_CONTROLLER,    //全状态反馈控制
-  PIDPOS_CONTROLLER, //位置式PID控制
-  PIDINC_CONTROLLER, //增量式PID控制
+  NONE_CONTROLLER = 0, //未初始化
+  FSF_CONTROLLER,      //全状态反馈控制
+  PIDPOS_CONTROLLER,   //位置式PID控制
+  PIDINC_CONTROLLER,   //增量式PID控制
+  ADRC_CONTROLLER,     //ADRC控制器
   CONTROLLER_TYPE_NUM,
 } ControllerType;
 
@@ -38,7 +39,7 @@ typedef struct {
   fp32 *I_loop_Hlim; //循环输入的上限(上下限设置为0即为不限制)
 } ControllerConstrain;
 
-typedef struct Controller{
+typedef struct Controller {
   ControllerType       type;
   uint8_t              I_size;    //输入的数据大小
   uint8_t              O_size;    //输出的数据大小
@@ -48,10 +49,10 @@ typedef struct Controller{
 
 #define CLAMP(input, min, max)                                                                                                \
   {                                                                                                                           \
-    if ((input) > (max)) {                                                                                                        \
-      (input) = (max);                                                                                                            \
-    } else if ((input) < (min)) {                                                                                                 \
-      (input) = (min);                                                                                                            \
+    if ((input) > (max)) {                                                                                                    \
+      (input) = (max);                                                                                                        \
+    } else if ((input) < (min)) {                                                                                             \
+      (input) = (min);                                                                                                        \
     }                                                                                                                         \
   }
 

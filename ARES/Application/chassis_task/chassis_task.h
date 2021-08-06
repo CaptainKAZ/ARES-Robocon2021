@@ -31,7 +31,7 @@ struct {
   fp32 wz;
 } instruct;
 struct {
-  Motor* motor[2][8];
+  Motor* motor[2][4];
   Swerve swerve[4];
 } component;
 } Chassis;

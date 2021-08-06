@@ -27,6 +27,7 @@
 #include "ops.h"
 #include "computer_task.h"
 #include "interboard_spi.h"
+#include "pwm_input.h"
 
 /**
   * @brief    TIM6中断服务程序，负责计时器更新
@@ -145,3 +146,5 @@ void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi) {
     Interboard_errorHook();
   }
 }
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) { PwmInput_captureHook(htim); }

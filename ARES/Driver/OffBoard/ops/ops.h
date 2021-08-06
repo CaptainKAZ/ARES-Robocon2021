@@ -30,6 +30,8 @@ typedef struct {
   fp32     x;     //单位mm
   fp32     y;     //单位mm
   fp32     w;     //单位dps
+  fp32     vx;
+  fp32     vy;
   uint32_t updateTime;
 } Ops;
 

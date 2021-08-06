@@ -30,7 +30,7 @@ static StaticSemaphore_t rmMotorMutexBuffer;
 static PID_ControllerParam RM_default_speed_pid_param   = {.general.type = PIDPOS_CONTROLLER,
                                                          .Int_type     = BACK_CALCULATION_INT,
                                                          .kB           = 0.015f,
-                                                         .kP           = 1.5f,
+                                                         .kP           = 2.0f,
                                                          .kI           = 0.1f,
                                                          .kD           = 0,
                                                          .max_Iout     = 16000.0f,
@@ -51,8 +51,8 @@ static ControllerConstrain M3508_speed_constrain        = {.I_loop_Hlim = &M3508
                                                     .I_loop_Llim = &M3508_speed_I_loop_Llim,
                                                     .O_Hlim      = &M3508_speed_O_Hlim,
                                                     .O_Llim      = &M3508_speed_O_Llim};
-static fp32                M2006_speed_O_Hlim           = 10000.0f;
-static fp32                M2006_speed_O_Llim           = -10000.0f;
+static fp32                M2006_speed_O_Hlim           = 16000.0f;
+static fp32                M2006_speed_O_Llim           = -16000.0f;
 static fp32                M2006_speed_I_loop_Llim      = 0;
 static fp32                M2006_speed_I_loop_Hlim      = 0;
 static ControllerConstrain M2006_speed_constrain        = {.I_loop_Hlim = &M2006_speed_I_loop_Hlim,
@@ -90,10 +90,10 @@ static ControllerConstrain M3508_angle_constrain        = {.I_loop_Hlim = &RM_de
                                                     .I_loop_Llim = &RM_default_angle_I_loop_Llim,
                                                     .O_Hlim      = &M3508_angle_O_Hlim,
                                                     .O_Llim      = &M3508_angle_O_Llim};
-static fp32                M2006_angle_O_Hlim           = 500.0f;
-static fp32                M2006_angle_O_Llim           = -500.0f;
-static ControllerConstrain M2006_angle_constrain        = {.I_loop_Hlim = &RM_default_I_loop_Hlim,
-                                                    .I_loop_Llim = &RM_default_I_loop_Llim,
+static fp32                M2006_angle_O_Hlim           = 80000.0f;
+static fp32                M2006_angle_O_Llim           = -80000.0f;
+static ControllerConstrain M2006_angle_constrain        = {.I_loop_Hlim = &RM_default_angle_I_loop_Llim,
+                                                    .I_loop_Llim = &RM_default_angle_I_loop_Llim,
                                                     .O_Hlim      = &M2006_angle_O_Hlim,
                                                     .O_Llim      = &M2006_angle_O_Llim};
 static fp32                GM6020_angle_O_Hlim          = 320.0f;
@@ -115,7 +115,7 @@ static ControllerConstrain GM6020_angle_constrain       = {.I_loop_Hlim = &RM_de
   }
 
 static void RM_Motor_init(RM_Motor *self, CAN_Device device, uint8_t id) {
-  for (uint8_t i = 0; i < sizeof(RM_Motor); i++) {
+  for (uint16_t i = 0; i < sizeof(RM_Motor); i++) {
     ((uint8_t *)self)[i] = 0;
   }
   MOTOR->reductionRatio = 1;
@@ -374,7 +374,12 @@ void RM_Motor_execute(void) {
     if (rmMotor[i][0].general.instruct.type != INSTRUCT_EASE || rmMotor[i][1].general.instruct.type != INSTRUCT_EASE ||
         rmMotor[i][2].general.instruct.type != INSTRUCT_EASE || rmMotor[i][3].general.instruct.type != INSTRUCT_EASE) {
       RM_Motor_command(rmMotor[i][0].set_current, rmMotor[i][1].set_current, rmMotor[i][2].set_current,
-                       rmMotor[i][3].set_current, RM_MOTOR_FRAME_HEAD_1, INTERNAL_CAN1);
+                       rmMotor[i][3].set_current, RM_MOTOR_FRAME_HEAD_1, (CAN_Device)i);
+    }
+    if (rmMotor[i][4].general.instruct.type != INSTRUCT_EASE || rmMotor[i][5].general.instruct.type != INSTRUCT_EASE ||
+        rmMotor[i][6].general.instruct.type != INSTRUCT_EASE || rmMotor[i][7].general.instruct.type != INSTRUCT_EASE) {
+      RM_Motor_command(rmMotor[i][4].set_current, rmMotor[i][5].set_current, rmMotor[i][6].set_current,
+                       rmMotor[i][7].set_current, RM_MOTOR_FRAME_HEAD_2, (CAN_Device)i);
     }
   }
 }
@@ -392,6 +397,7 @@ void RM_Motor_setAsM2006(Motor *self) {
 }
 
 void RM_Motor_setAsGm6020(Motor *self) {
+  self->reductionRatio            = 1;
   RM->angle_pid.general.constrain = &GM6020_angle_constrain;
   RM->speed_pid.general.constrain = &GM6020_speed_constrain;
 }

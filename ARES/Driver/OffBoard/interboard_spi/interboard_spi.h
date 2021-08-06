@@ -34,7 +34,7 @@ typedef enum {
   * @brief    通信协议部分
   * 
   */
-#define INTERBOARD_MAX_FRAME_LENGTH (30)
+#define INTERBOARD_MAX_FRAME_LENGTH (32)
 #define INTERBOARD_FRAME_HEAD (0x0F)
 #define INTERBOARD_FRAME_ACK_BIT (1<<6)
 #define INTERBOARD_TXBUF_SIZE (3)
@@ -43,11 +43,13 @@ typedef enum {
   INTERBOARDMSG_BATT,
   INTERBOARDMSG_IMU,
   INTERBOARDMSG_COMPUTER,
+  INTERBOARDMSG_SERVO,
 } InterboardMsgType;
 
 extern void            Interboard_start(void);
 extern void            Interboard_init(void);
 extern void            Interboard_tx(InterboardMsgType msgType, uint8_t len, uint8_t *buf);
+extern void            InterboardUsb_tx(uint8_t* buf,uint32_t len);
 extern InterboardState interboardTxState;
 extern void            Interboard_txRxCpltHook(void);
 extern void            Interboard_errorHook(void);

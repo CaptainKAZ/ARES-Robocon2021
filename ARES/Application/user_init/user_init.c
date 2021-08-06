@@ -20,7 +20,7 @@
 #include "tim.h"
 #include "can_comm.h"
 #include "ops.h"
-#include "encoder.h"
+#include "can_encoder.h"
 #include "gpio.h"
 #include "can.h"
 #include "interboard_spi.h"
@@ -38,7 +38,11 @@ void User_Init(void) {
   Sbus_init();
   Ops_init();
   HAL_TIM_Base_Start_IT(&htim6);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  //HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_2);
+  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_3);
+  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_4);
   HAL_GPIO_WritePin(PWR0_GPIO_Port, PWR0_Pin, GPIO_PIN_SET);
   HAL_Delay(100);
   HAL_GPIO_WritePin(PWR1_GPIO_Port, PWR1_Pin, GPIO_PIN_SET);

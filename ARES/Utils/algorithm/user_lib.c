@@ -211,16 +211,16 @@ inline int is_in_isr(void) {
 fp32 maxabs4f(fp32 value0, fp32 value1, fp32 value2, fp32 value3) {
   fp32 ret = 0;
 
-  if (_fabsf(value0 > ret)) {
+  if (_fabsf(value0) > ret) {
     ret = __fabsf(value0);
   }
-  if (_fabsf(value1 > ret)) {
+  if (_fabsf(value1) > ret) {
     ret = __fabsf(value1);
   }
-  if (_fabsf(value2 > ret)) {
+  if (_fabsf(value2) > ret) {
     ret = __fabsf(value2);
   }
-  if (_fabsf(value3 > ret)) {
+  if (_fabsf(value3) > ret) {
     ret = __fabsf(value3);
   }
   return ret;

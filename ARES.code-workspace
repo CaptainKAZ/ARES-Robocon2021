@@ -55,7 +55,9 @@
       "s_curve.h": "c",
       "main.h": "c",
       "interboard_spi.h": "c",
-      "spi.h": "c"
+      "spi.h": "c",
+      "servo.h": "c",
+      "fsm.h": "c"
     },
 	},
 	"extensions": {

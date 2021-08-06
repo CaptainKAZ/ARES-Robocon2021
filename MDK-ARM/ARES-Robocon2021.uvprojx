@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F427xx, ARM_MATH_CM4,__TARGET_FPU_VFP=1</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc; ../Drivers/STM32F4xx_HAL_Driver/Inc; ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy; ../Middlewares/Third_Party/FreeRTOS/Source/include; ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F; ../Drivers/CMSIS/Device/ST/STM32F4xx/Include; ../Drivers/CMSIS/Include; ..\DSP\Include; ..\Drivers\CMSIS\DSP\Include; ../Middlewares/ST/STM32_MotionFX_Library/Inc; ../Middlewares/ST/STM32_MotionMC_Library/Inc; ..\ARES\Application\INS_task; ..\ARES\Application\motor_task; ..\ARES\Application\state_steaming; ..\ARES\Application\user_init; ..\ARES\Application\feedback_task; ..\ARES\Application\monitor_task; ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2; ..\ARES\Application\quick_test_task; ..\ARES\Application\chassis_task; ..\ARES\Application\computer_task; ..\ARES\Driver\Components\steer; ..\ARES\Driver\OffBoard\encoder; ..\ARES\Driver\OffBoard\mcp2515; ..\ARES\Driver\OffBoard\motor; ..\ARES\Driver\OffBoard\ops; ..\ARES\Driver\OffBoard\sbus; ..\ARES\Driver\OnBoard\can_comm; ..\ARES\Driver\OnBoard\flash; ..\ARES\Driver\OnBoard\imu; ..\ARES\Utils\algorithm; ..\ARES\Utils\controller; ..\ARES\Utils\cpu_utils; ..\ARES\Utils\stopwatch; ..\ARES\Driver\Components\swerve; ..\ARES\Driver\OffBoard\interboard_spi</IncludePath>
+              <IncludePath>../Core/Inc; ../Drivers/STM32F4xx_HAL_Driver/Inc; ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy; ../Middlewares/Third_Party/FreeRTOS/Source/include; ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F; ../Drivers/CMSIS/Device/ST/STM32F4xx/Include; ../Drivers/CMSIS/Include; ..\DSP\Include; ..\Drivers\CMSIS\DSP\Include; ../Middlewares/ST/STM32_MotionFX_Library/Inc; ../Middlewares/ST/STM32_MotionMC_Library/Inc; ..\ARES\Application\INS_task; ..\ARES\Application\motor_task; ..\ARES\Application\state_steaming; ..\ARES\Application\user_init; ..\ARES\Application\feedback_task; ..\ARES\Application\monitor_task; ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2; ..\ARES\Application\quick_test_task; ..\ARES\Application\chassis_task; ..\ARES\Application\computer_task; ..\ARES\Driver\Components\steer; ..\ARES\Driver\OffBoard\encoder; ..\ARES\Driver\OffBoard\mcp2515; ..\ARES\Driver\OffBoard\motor; ..\ARES\Driver\OffBoard\ops; ..\ARES\Driver\OffBoard\sbus; ..\ARES\Driver\OnBoard\can_comm; ..\ARES\Driver\OnBoard\flash; ..\ARES\Driver\OnBoard\imu; ..\ARES\Utils\algorithm; ..\ARES\Utils\controller; ..\ARES\Utils\cpu_utils; ..\ARES\Utils\stopwatch; ..\ARES\Driver\Components\swerve; ..\ARES\Driver\OffBoard\interboard_spi; ..\ARES\Driver\OnBoard\pwm_input; ..\ARES\Driver\OffBoard\servo; ..\ARES\Driver\OffBoard\computer; ..\ARES\Utils\fsm</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -678,11 +678,6 @@
               <FilePath>..\ARES\Application\quick_test_task\quick_test_task.c</FilePath>
             </File>
             <File>
-              <FileName>test_chassis_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ARES\Application\chassis_task\test_chassis_task.c</FilePath>
-            </File>
-            <File>
               <FileName>monitor_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ARES\Application\monitor_task\monitor_task.c</FilePath>
@@ -691,6 +686,16 @@
               <FileName>computer_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ARES\Application\computer_task\computer_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>tr_chassis.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Application\chassis_task\tr_chassis.c</FilePath>
+            </File>
+            <File>
+              <FileName>dr_chassis.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Application\chassis_task\dr_chassis.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -737,16 +742,16 @@
               <FileType>1</FileType>
               <FilePath>..\ARES\Driver\OnBoard\imu\imu_comm.c</FilePath>
             </File>
+            <File>
+              <FileName>pwm_input.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\OnBoard\pwm_input\pwm_input.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>ARES/Drivers/OffBoard</GroupName>
           <Files>
-            <File>
-              <FileName>encoder.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ARES\Driver\OffBoard\encoder\encoder.c</FilePath>
-            </File>
             <File>
               <FileName>motor.c</FileName>
               <FileType>1</FileType>
@@ -781,6 +786,26 @@
               <FileName>interboard_spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ARES\Driver\OffBoard\interboard_spi\interboard_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>servo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\OffBoard\servo\servo.c</FilePath>
+            </File>
+            <File>
+              <FileName>can_encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\OffBoard\encoder\can_encoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>pwm_encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\OffBoard\encoder\pwm_encoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>computer_usb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Driver\OffBoard\computer\computer_usb.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -826,6 +851,16 @@
               <FileName>bezier_trajectory.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ARES\Utils\algorithm\bezier_trajectory.c</FilePath>
+            </File>
+            <File>
+              <FileName>ADRC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Utils\controller\ADRC.c</FilePath>
+            </File>
+            <File>
+              <FileName>fsm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ARES\Utils\fsm\fsm.c</FilePath>
             </File>
           </Files>
         </Group>

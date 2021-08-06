@@ -70,7 +70,7 @@ static ControllerConstrain RMD_default_angle_constrain   = {.I_loop_Hlim = &RMD_
   }
 
 void RMD_Motor_Init(Motor *self, CAN_Device device, uint8_t id) {
-  for (uint8_t i = 0; i < sizeof(RMD_Motor); i++) {
+  for (uint16_t i = 0; i < sizeof(RMD_Motor); i++) {
     ((uint8_t *)self)[i] = 0;
   }
   MOTOR->info.device = device;

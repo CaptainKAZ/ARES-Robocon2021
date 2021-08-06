@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "motor_task.h": "c"
-    }
+    },
+    "editor.tabSize": 2
 }

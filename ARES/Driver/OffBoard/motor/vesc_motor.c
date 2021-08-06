@@ -42,6 +42,7 @@ static void VESC_Motor_Command(CAN_Device device, uint32_t eid, uint8_t *data, u
   frame.device = device;
   frame.data   = data;
   frame.id     = eid;
+  frame.len     = len;
   frame.type   = CAN_FRAME_EXT;
   CAN_Tx(&frame);
 }
@@ -61,23 +62,35 @@ void VESC_Motor_RxHook(CAN_Frame *frame) {
   int8_t  index      = 127; // Positive means found; negative means the empty one; 127 means full
 
   // Find motor
-  for (uint8_t i = 0; i < 8; i++) {
-    if (vesc_motor->general.info.type == VESC_MOTOR) {
-      if (vesc_motor[i].general.info.device == frame->device && vesc_motor[i].general.info.id == id) {
-        index = i;
-        break;
-      }
-    } else {
-      index = -i;
+//  for (uint8_t i = 0; i < 8; i++) {
+//    if (vesc_motor->general.info.type == VESC_MOTOR) {
+//      if (vesc_motor[i].general.info.device == frame->device && vesc_motor[i].general.info.id == id) {
+//        index = i;
+//        break;
+//      }
+//    } else {
+//      index = -i;
+//    }
+//  }
+//  if (index == 127) {
+//    return;
+//  } else if (index < 0) {
+//    index = -index;
+//    if ((frame->id >> 8) == CAN_PACKET_STATUS_4) {
+//      VESC_Motor_Init(&vesc_motor[index], frame->device, id);
+//      vesc_motor[index].general.status.angle = DEG2RAD(((frame->data[4] << 8 | frame->data[5]) / 50.0f))-vesc_motor[index].general.status.zero;
+//    } else {
+//      return;
+//    }
+//  }
+  index= id;
+  if ((frame->id >> 8) == CAN_PACKET_STATUS_4&&vesc_motor[index].general.info.type!=VESC_MOTOR) {
+      VESC_Motor_Init(&vesc_motor[index], frame->device, id);
+      vesc_motor[index].general.status.angle = DEG2RAD(((frame->data[4] << 8 | frame->data[5]) / 50.0f))-vesc_motor[index].general.status.zero;
+    } else if(vesc_motor[index].general.info.type!=VESC_MOTOR) {
+      VESC_Motor_Init(&vesc_motor[index], frame->device, id);
+      return;
     }
-  }
-  if (index == 127) {
-    return;
-  } else if (index < 0) {
-    index = -index;
-    VESC_Motor_Init(&vesc_motor[index], frame->device, id);
-    vesc_motor[index].general.status.angle = DEG2RAD(((frame->data[4] << 8 | frame->data[5]) / 50.0f));
-  }
   switch (frame->id >> 8) {
   case CAN_PACKET_STATUS:
     vesc_motor[index].status1_timestamp = xTaskGetTickCount();
@@ -91,9 +104,9 @@ void VESC_Motor_RxHook(CAN_Frame *frame) {
     vesc_motor[index].general.status.angle       = DEG2RAD(((frame->data[4] << 8 | frame->data[5]) / 50.0f));
     vesc_motor[index].general.status.temperature = (frame->data[2] << 8 | frame->data[3]) / 10.0f;
     if (vesc_motor[index].general.status.angle - last_angle > PI) {
-      vesc_motor[index].cumulativeTurn--;
+      vesc_motor[index].general.status.cumulativeTurn--;
     } else if (vesc_motor[index].general.status.angle - last_angle < -PI) {
-      vesc_motor[index].cumulativeTurn++;
+      vesc_motor[index].general.status.cumulativeTurn++;
     }
     break;
   default: break;
@@ -108,8 +121,9 @@ void VESC_Motor_Zero(Motor *self) {
     return;
   }
   xSemaphoreTake(VESC_Motor_Mutex, portMAX_DELAY);
-  VESC->zero            = MOTOR->status.angle;
-  VESC->cumulativeTurn = 0;
+  MOTOR->status.cumulativeTurn = 0;
+  MOTOR->status.zero           = MOTOR->status.angle;
+  MOTOR->status.angle          = 0;
   xSemaphoreGive(VESC_Motor_Mutex);
 }
 
@@ -198,15 +212,19 @@ void VESC_Motor_Execute(void) {
     VESC_Motor_Mutex = xSemaphoreCreateMutexStatic(&VESC_Motor_MutexBuffer);
   }
   xSemaphoreTake(VESC_Motor_Mutex, portMAX_DELAY);
-  int32_t           send_index = 0;
-  uint8_t           buffer[4];
-  MotorInstructType alt_instruct;
+  int32_t send_index = 0;
+  uint8_t buffer[4];
   for (uint8_t i = 0; i < 8; i++) {
     if (vesc_motor[i].general.info.type == VESC_MOTOR) {
       //结构体已经初始化
-      if (--vesc_motor->general.instruct.timeout > 0) {
+      if (--vesc_motor[i].general.instruct.timeout > 0) {
+        MotorInstructType alt_instruct = vesc_motor[i].general.instruct.type;
+        if (alt_instruct == INSTRUCT_ALTERNATIVE) {
+          alt_instruct = vesc_motor[i].general.alt_controller_update(
+              (Motor *)&vesc_motor[i], vesc_motor->general.alt_controller, vesc_motor[i].general.alt_controller_param);
+        }
         //指令未超时
-        switch (vesc_motor[i].general.instruct.type) {
+        switch (alt_instruct) {
         case INSTRUCT_CURRENT:
           if (vesc_motor[i].general.instruct.set != 0)
             buffer_append_int32(buffer, (int32_t)(vesc_motor[i].general.instruct.set), &send_index);
@@ -219,33 +237,12 @@ void VESC_Motor_Execute(void) {
                              vesc_motor[i].general.info.id | ((uint32_t)CAN_PACKET_SET_RPM << 8), buffer, send_index);
           break;
         case INSTRUCT_ANGLE:
+        case INSTRUCT_ANGLE_CUMULATIVE:
           buffer_append_int32(buffer, (int32_t)(RAD2DEG(vesc_motor[i].general.instruct.set) * 1000000.0f), &send_index);
           VESC_Motor_Command(vesc_motor[i].general.info.device,
                              vesc_motor[i].general.info.id | ((uint32_t)CAN_PACKET_SET_POS << 8), buffer, send_index);
           break;
-        case INSTRUCT_ALTERNATIVE:
-          alt_instruct = vesc_motor[i].general.alt_controller_update(
-              (Motor *)&vesc_motor[i], vesc_motor->general.alt_controller, vesc_motor[i].general.alt_controller_param);
-          switch (alt_instruct) {
-          case INSTRUCT_CURRENT:
-            if (vesc_motor[i].general.instruct.set != 0)
-              buffer_append_int32(buffer, (int32_t)(vesc_motor[i].general.instruct.set), &send_index);
-            VESC_Motor_Command(vesc_motor[i].general.info.device,
-                               vesc_motor[i].general.info.id | ((uint32_t)CAN_PACKET_SET_CURRENT << 8), buffer, send_index);
-            break;
-          case INSTRUCT_SPEED:
-            buffer_append_int32(buffer, (int32_t)(vesc_motor[i].general.instruct.set), &send_index);
-            VESC_Motor_Command(vesc_motor[i].general.info.device,
-                               vesc_motor[i].general.info.id | ((uint32_t)CAN_PACKET_SET_RPM << 8), buffer, send_index);
-            break;
-          case INSTRUCT_ANGLE:
-            buffer_append_int32(buffer, (int32_t)(RAD2DEG(vesc_motor[i].general.instruct.set) * 1000000.0f), &send_index);
-            VESC_Motor_Command(vesc_motor[i].general.info.device,
-                               vesc_motor[i].general.info.id | ((uint32_t)CAN_PACKET_SET_POS << 8), buffer, send_index);
-            break;
-          default:break;
-          }
-          break;
+        case INSTRUCT_ALTERNATIVE: break;
         default: break;
         }
       } else {
@@ -259,7 +256,7 @@ void VESC_Motor_Execute(void) {
       }
     } else {
       //结构体未初始化
-      break;
+      //continue;
     }
   }
   xSemaphoreGive(VESC_Motor_Mutex);

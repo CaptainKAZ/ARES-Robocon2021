@@ -20,7 +20,7 @@
 #include "main.h"
 #include "motor.h"
 #include "PID.h"
-#include "encoder.h"
+#include "can_encoder.h"
 
 #define STEER_ENCODER_DIRECTION (-1)
 #define STEER_ENCODER_REDUCTION_RATIO (4)

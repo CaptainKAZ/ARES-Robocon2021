@@ -86,6 +86,6 @@ extern void Motor_AltControl(Motor *self, uint32_t timeout);
 Motor *     CAN_Find_Motor(MotorType type, CAN_Device device, uint8_t id);
 extern void RM_Motor_setAsM3508(Motor *self);
 extern void RM_Motor_setAsM2006(Motor *self);
-extern void RM_Motor_setAsGm6020(Motor *self)
+extern void RM_Motor_setAsGm6020(Motor *self);
 
 #endif

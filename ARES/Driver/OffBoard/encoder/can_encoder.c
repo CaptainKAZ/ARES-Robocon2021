@@ -15,7 +15,7 @@
   * 
   * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
   */
-#include "encoder.h"
+#include "can_encoder.h"
 #include "cmsis_os.h"
 
 CanEncoder canEncoder[2][4];

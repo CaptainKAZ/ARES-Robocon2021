@@ -18,7 +18,7 @@
 #include "feedback_task.h"
 #include "string.h"
 #include "usart.h"
-
+#include "sbus.h"
 static fp32 *  feedback_pointer[FEEDBACK_CHANNEL_NUM];
 static uint8_t tx_buf[(FEEDBACK_CHANNEL_NUM + 1) * sizeof(fp32) + 4];
 
@@ -32,7 +32,9 @@ uint8_t feedback_register(fp32 *ptr, uint8_t channel) {
 
 void feedback_task() {
   vTaskDelay(303);
+  
   while (1) {
+    Sbus_lpf();
     for (uint8_t i = 0; i < FEEDBACK_CHANNEL_NUM; i++) {
       if (feedback_pointer[i] != NULL) {
         memcpy(&tx_buf[i * sizeof(fp32)], feedback_pointer[i], sizeof(fp32));
