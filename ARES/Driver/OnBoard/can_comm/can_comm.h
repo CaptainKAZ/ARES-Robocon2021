@@ -21,7 +21,7 @@
 #include "can.h"
 
 typedef enum {
-  INTERNAL_CAN1=0,
+  INTERNAL_CAN1 = 0,
   INTERNAL_CAN2,
   EXTERNAL_CAN1,
   EXTERNAL_CAN2,
@@ -49,6 +49,7 @@ typedef struct {
 
 extern void CAN_RxHook(CAN_Frame *frame);
 extern void CAN_Tx(CAN_Frame *frame);
+extern void CAN_TxCpltHook(CAN_HandleTypeDef *hcan);
 
 extern void CAN_Start(CAN_Device device);
 #endif

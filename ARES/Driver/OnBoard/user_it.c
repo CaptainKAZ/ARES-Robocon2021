@@ -140,11 +140,31 @@ void USART6_IRQHandler(void) {
     __HAL_UART_CLEAR_FLAG(&huart6, UART_FLAG_TC);
   }
 }
-
+/**
+  * @brief    SPI板间通信错误中断
+  */
 void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi) {
   if (hspi == &hspi1) {
     Interboard_errorHook();
   }
 }
 
+/**
+  * @brief    TIM输入捕获中断
+  */
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) { PwmInput_captureHook(htim); }
+
+/**
+  * @brief    CAN TX Mailbox 0 传输完成中断
+  */
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan) { CAN_TxCpltHook(hcan); }
+
+/**
+  * @brief    CAN TX Mailbox 1 传输完成中断
+  */
+void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan) { CAN_TxCpltHook(hcan); }
+
+/**
+  * @brief    CAN TX Mailbox 2传输完成中断
+  */
+void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan) { CAN_TxCpltHook(hcan); }

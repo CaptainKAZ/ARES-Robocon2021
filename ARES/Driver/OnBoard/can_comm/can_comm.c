@@ -18,13 +18,31 @@
 #include "can_comm.h"
 #include "interboard_spi.h"
 #include "string.h"
+#include "small_queue.h"
 
-uint8_t canRxBuf[sizeof(CAN_Frame) + 8];
+static uint8_t             canInterboardBuf[sizeof(CAN_Frame) + 8];
+static CAN_TxHeaderTypeDef canTxHeaderBuf[2][3];
+static uint8_t             canTxDataBuf[2][3][8];
+static SmallQueue          canTxQueue[2];
 
 extern void RM_Motor_rxHook(CAN_Frame *frame);
 extern void RMD_Motor_RxHook(CAN_Frame *frame);
 extern void VESC_Motor_RxHook(CAN_Frame *frame);
 extern void Encoder_RxHook(CAN_Frame *frame);
+
+void CAN_TxCpltHook(CAN_HandleTypeDef *hcan) {
+  uint8_t i = 255;
+  if (hcan == &hcan1) {
+    i = 0;
+  } else if (hcan == &hcan2) {
+    i = 1;
+  }
+  if (!SmallQueue_isEmpty(&canTxQueue[i])) {
+    HAL_CAN_AddTxMessage(hcan, &canTxHeaderBuf[i][SmallQueue_getDequeueIndex(&canTxQueue[i])],
+                         canTxDataBuf[i][SmallQueue_getDequeueIndex(&canTxQueue[i])], NULL);
+    SmallQueue_dequeue(&canTxQueue[i]);
+  }
+}
 
 void CAN_RxHook(CAN_Frame *frame) {
   if (frame->type == CAN_FRAME_STD) {
@@ -48,13 +66,23 @@ void CAN_Tx(CAN_Frame *frame) {
     TxHeader.ExtId              = frame->type == CAN_FRAME_STD ? 0 : frame->id;
     TxHeader.RTR                = CAN_RTR_DATA;
     TxHeader.TransmitGlobalTime = DISABLE;
-    HAL_CAN_AddTxMessage(frame->device == INTERNAL_CAN1 ? &hcan1 : &hcan2, &TxHeader, frame->data, NULL);
+    // while (0 == HAL_CAN_GetTxMailboxesFreeLevel(frame->device == INTERNAL_CAN1 ? &hcan1 : &hcan2))
+    //   ;
+    if (0 != HAL_CAN_GetTxMailboxesFreeLevel(frame->device == INTERNAL_CAN1 ? &hcan1 : &hcan2)){
+      HAL_CAN_AddTxMessage(frame->device == INTERNAL_CAN1 ? &hcan1 : &hcan2, &TxHeader, frame->data, NULL);
+    }else{
+      //加入外置发送队列
+      memcpy(&canTxHeaderBuf[frame->device][SmallQueue_getEnqueueIndex(&canTxQueue[frame->device])], &TxHeader,
+             sizeof(CAN_TxHeaderTypeDef));
+      memcpy(canTxDataBuf[frame->device][SmallQueue_getEnqueueIndex(&canTxQueue[frame->device])], frame->data, 8);
+      SmallQueue_enqueue(&canTxQueue[frame->device]);
+    }
   } else if (frame->device <= EXTERNAL_CAN2) {
-    memset(canRxBuf, 0, sizeof(canRxBuf));
-    memcpy(canRxBuf, frame, sizeof(CAN_Frame));
-    memcpy(&canRxBuf[sizeof(CAN_Frame)], frame->data, frame->len);
+    memset(canInterboardBuf, 0, sizeof(canInterboardBuf));
+    memcpy(canInterboardBuf, frame, sizeof(CAN_Frame));
+    memcpy(&canInterboardBuf[sizeof(CAN_Frame)], frame->data, frame->len);
     if (interboardTxState != INTERBOARD_BUSY) {
-      Interboard_tx(INTERBOARDMSG_CAN, sizeof(canRxBuf), canRxBuf);
+      Interboard_tx(INTERBOARDMSG_CAN, sizeof(canInterboardBuf), canInterboardBuf);
     }
   }
 }
@@ -86,10 +114,14 @@ void CAN_Start(CAN_Device device) {
   if (device <= INTERNAL_CAN2) {
     CAN_HandleTypeDef *hcan = device == INTERNAL_CAN1 ? &hcan1 : &hcan2;
     CAN_Filter_Init(hcan);
+    SmallQueue_init(&canTxQueue[device], 3);
     if (HAL_CAN_Start(hcan) != HAL_OK) {
       Error_Handler();
     }
     if (HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
+      Error_Handler();
+    }
+    if (HAL_CAN_ActivateNotification(hcan, CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK) {
       Error_Handler();
     }
   }
