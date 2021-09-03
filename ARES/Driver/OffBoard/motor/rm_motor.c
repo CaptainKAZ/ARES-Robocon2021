@@ -19,7 +19,7 @@
 #include "cmsis_os.h"
 #include "semphr.h"
 #include "monitor_task.h"
-
+#include "user_lib.h"
 MonitorList rmMotorMonitor;
 
 static RM_Motor rmMotor[4][8];
@@ -149,13 +149,13 @@ void RM_Motor_rxHook(CAN_Frame *frame) {
 
   PARSE_RM_MOTOR(&(rmMotor[frame->device][id].general.status), frame->data);
   rmMotor[frame->device][id].rx_timestamp = xTaskGetTickCount();
-  RM_Motor_reduce((Motor *)&(rmMotor[frame->device][id]));
-
+  
   if (rmMotor[frame->device][id].general.status.angle - last_angle > PI) {
     rmMotor[frame->device][id].general.status.cumulativeTurn--;
   } else if (rmMotor[frame->device][id].general.status.angle - last_angle < -PI) {
     rmMotor[frame->device][id].general.status.cumulativeTurn++;
   }
+  RM_Motor_reduce((Motor *)&(rmMotor[frame->device][id]));
 }
 
 void RM_Motor_setSpeedPid(Motor *self, PID_ControllerParam *param) {
@@ -340,7 +340,8 @@ void RM_Motor_execute(void) {
                                &rmMotor[i][j].general.status.speedOutput, NULL);
           break;
         case INSTRUCT_ANGLE:
-          set_speed = controllerUpdate((Controller *)&rmMotor[i][j].angle_pid, &rmMotor[i][j].general.instruct.set,
+          set_speed = rmMotor[i][j].general.reductionRatio *
+                      controllerUpdate((Controller *)&rmMotor[i][j].angle_pid, &rmMotor[i][j].general.instruct.set,
                                        &rmMotor[i][j].general.status.angleOutput, NULL);
           rmMotor[i][j].set_current = controllerUpdate((Controller *)&rmMotor[i][j].speed_pid, &set_speed,
                                                        &rmMotor[i][j].general.status.speedOutput, NULL);

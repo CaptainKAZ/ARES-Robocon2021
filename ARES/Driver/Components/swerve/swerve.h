@@ -37,7 +37,8 @@ Y ←---- ✛ -----
 
 #define SWERVE_STEER_MOTOR_RATIO (8.125f)
 #define SWERVE_WHEEL_RADIUS (0.05f)
-#define SWERVE_DRIVE_MOTOR_RATIO (SWERVE_WHEEL_RADIUS * PI / 30.0f)
+#define SWERVE_DRIVE_MOTOR_RATIO (3.0f)
+#define SWERVE_SPEED_RATIO (30.0f * SWERVE_DRIVE_MOTOR_RATIO / SWERVE_WHEEL_RADIUS / PI)
 
 typedef struct {
 
@@ -46,21 +47,23 @@ typedef struct {
   Motor *steerMotor;
   Motor *driveMotor;
 
-  fp32 wheelRadius; //驱动电机到m/s的比例
+  fp32 speedRatio; //从期望线速度到驱动电机转速的比例
   fp32 encoderCenter;
-  //fp32 driveTarget; //航向目标(m/s)
+
+  fp32 speedTarget; //航向目标(m/s)
+  fp32 angleTarget; //舵向目标(rad)
 
   fp32 rho;   //相对与中心的距离(m)
   fp32 theta; //相对于中心的角度(RAD)
 
-  uint32_t updateTime;
   uint8_t  zeroed;
 } Swerve;
 
 extern uint8_t Swerve_init(Swerve *swerve, fp32 *encoder, Motor *steerMotor, Motor *driveMotor, fp32 steerMotorRatio,
-                           fp32 wheelRadius, fp32 x, fp32 y, fp32 encoderCenter);
-//extern void    Swerve_update(Swerve *swerve);
-extern void    Swerve_execute(Swerve *swerve, fp32 centerVx, fp32 centerVy, fp32 centerWz,uint32_t timeout);
-extern void    Swerve_setTargets(Swerve *swerve, fp32 angle, fp32 speed, uint32_t timeout);
+                           fp32 speedRatio, fp32 x, fp32 y, fp32 encoderCenter);
+extern void    Swerve_calc(Swerve *swerve, fp32 centerVx, fp32 centerVy, fp32 centerWz);
+extern void    Swerve_execute(Swerve *swerve, uint32_t timeout);
 extern uint8_t Swerve_goZero(Swerve *swerve);
+
+
 #endif

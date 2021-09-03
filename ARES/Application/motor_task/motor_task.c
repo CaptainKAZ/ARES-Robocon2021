@@ -16,9 +16,10 @@
   * ****************************(C) COPYRIGHT 2021 ARES@SUSTech****************************
   */
 #include "motor_task.h"
+static uint8_t counter=0;
 
 extern void RM_Motor_execute(void);
-extern void VESC_Motor_Execute(void);
+extern void VESC_Motor_Execute(uint8_t counter);
 extern void RMD_Motor_Execute(void);
 
 void motor_task(void *pvParameters) {
@@ -28,8 +29,11 @@ void motor_task(void *pvParameters) {
   while (1) {
     xLastWakeTime = xTaskGetTickCount();
     RM_Motor_execute();
-    VESC_Motor_Execute();
     RMD_Motor_Execute();
+    ++counter;
+    counter %= 8;
+    VESC_Motor_Execute(counter);
+
     vTaskDelayUntil(&xLastWakeTime, MOTOR_CTRL_TIME); //使用vTaskDelayUntil()保证精确延迟
   }
 }

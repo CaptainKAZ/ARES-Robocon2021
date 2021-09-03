@@ -182,7 +182,7 @@ __INLINE fp32 fmaxf(fp32 x, fp32 y) {
 
 fp32 atan2_fast(fp32 x, fp32 y) {
   float ax = __fabs(x), ay = __fabs(y);
-  float a = fmin(ax, ay) / (fmax(ax, ay) + FLT_EPSILON);
+  float a = fminf(ax, ay) / (fmaxf(ax, ay) + FLT_EPSILON);
   float s = a * a;
   float r = ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;
   if (ay > ax)
