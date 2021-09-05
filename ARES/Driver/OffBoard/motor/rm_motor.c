@@ -20,6 +20,7 @@
 #include "semphr.h"
 #include "monitor_task.h"
 #include "user_lib.h"
+#include "string.h"
 MonitorList rmMotorMonitor;
 
 static RM_Motor rmMotor[4][8];
@@ -138,7 +139,8 @@ __inline static void RM_Motor_reduce(Motor *motor) {
 
 void RM_Motor_rxHook(CAN_Frame *frame) {
   uint8_t id         = frame->id - 0x201;
-  fp32    last_angle = rmMotor[frame->device][id].general.status.angle;
+  
+  //电机未被初始化
   if (rmMotor[frame->device][id].general.info.type == NONE_MOTOR) {
     RM_Motor_init(&rmMotor[frame->device][id], frame->device, id);
     PARSE_RM_MOTOR(&(rmMotor[frame->device][id].general.status), frame->data);
@@ -147,6 +149,14 @@ void RM_Motor_rxHook(CAN_Frame *frame) {
     return;
   }
 
+  //电机已经被初始化但是掉线，清除电机储存信息
+  if (xTaskGetTickCount() - rmMotor[frame->device][id].rx_timestamp > RM_MOTOR_OFFLINE_TIMEOUT){
+    memset(&rmMotor[frame->device][id], 0, sizeof(RM_Motor));
+    return;
+  }
+
+  //正常情况
+  fp32 last_angle = rmMotor[frame->device][id].general.status.angle;
   PARSE_RM_MOTOR(&(rmMotor[frame->device][id].general.status), frame->data);
   rmMotor[frame->device][id].rx_timestamp = xTaskGetTickCount();
   
